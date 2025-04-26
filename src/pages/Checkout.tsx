@@ -256,8 +256,7 @@ const Checkout = () => {
   
   const restaurantName = items[0]?.restaurantName || "Restaurant";
   const subtotal = getCartTotal();
-  // Only apply delivery fee when dabbawala option is selected
-  const deliveryFee = form.watch('deliveryOption') === 'dabbawala' ? 40 : 0;
+  const deliveryFee = 40;
   const taxes = Math.round(subtotal * 0.05);
   const total = subtotal + deliveryFee + taxes;
   
@@ -748,12 +747,10 @@ const Checkout = () => {
                 <span className="text-gray-600">Subtotal</span>
                 <span>₹{subtotal}</span>
               </div>
-              {form.watch('deliveryOption') === 'dabbawala' && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Delivery Fee</span>
-                  <span>₹{deliveryFee}</span>
-                </div>
-              )}
+              <div className="flex justify-between">
+                <span className="text-gray-600">Delivery Fee</span>
+                <span>₹{deliveryFee}</span>
+              </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Taxes</span>
                 <span>₹{taxes}</span>
