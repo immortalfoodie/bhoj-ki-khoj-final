@@ -42,6 +42,7 @@ const Checkout = () => {
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userData, setUserData] = useState<{ user: any; profile: any } | null>(null);
+  const [isFetchingLocation, setIsFetchingLocation] = useState(false);
   
   const form = useForm({
     defaultValues: {
@@ -84,6 +85,109 @@ const Checkout = () => {
       navigate('/login', { state: { from: '/checkout' } });
     }
   }, [isAuthenticated, navigate]);
+
+  // Function to get user's current location
+  const getUserLocation = () => {
+    setIsFetchingLocation(true);
+    if ("geolocation" in navigator) {
+      // First fetch - low accuracy
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          
+          try {
+            // Get address from MapTiler
+            const response = await fetch(
+              `https://api.maptiler.com/geocoding/${longitude},${latitude}.json?key=${MAPTILER_API_KEY}`
+            );
+            const data = await response.json();
+            
+            if (data.features && data.features.length > 0) {
+              const address = data.features[0].place_name;
+              form.setValue('address', address);
+              setDeliveryCoordinates([latitude, longitude]);
+            }
+
+            // Second fetch - high accuracy
+            navigator.geolocation.getCurrentPosition(
+              async (position) => {
+                const { latitude, longitude } = position.coords;
+                
+                try {
+                  // Get address from MapTiler
+                  const response = await fetch(
+                    `https://api.maptiler.com/geocoding/${longitude},${latitude}.json?key=${MAPTILER_API_KEY}`
+                  );
+                  const data = await response.json();
+                  
+                  if (data.features && data.features.length > 0) {
+                    const address = data.features[0].place_name;
+                    form.setValue('address', address);
+                    setDeliveryCoordinates([latitude, longitude]);
+                    // Only show success toast after second fetch
+                    toast({
+                      title: "Location Found",
+                      description: "Your delivery address has been set to your current location.",
+                    });
+                  }
+                } catch (error) {
+                  console.error("Error getting address:", error);
+                  toast({
+                    title: "Error",
+                    description: "Could not get your address. Please enter it manually.",
+                    variant: "destructive"
+                  });
+                } finally {
+                  setIsFetchingLocation(false);
+                }
+              },
+              (error) => {
+                toast({
+                  title: "Location Error",
+                  description: "Please enable location access in your browser settings.",
+                  variant: "destructive"
+                });
+                setIsFetchingLocation(false);
+              },
+              {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+              }
+            );
+          } catch (error) {
+            console.error("Error getting address:", error);
+            toast({
+              title: "Error",
+              description: "Could not get your address. Please enter it manually.",
+              variant: "destructive"
+            });
+            setIsFetchingLocation(false);
+          }
+        },
+        (error) => {
+          toast({
+            title: "Location Error",
+            description: "Please enable location access in your browser settings.",
+            variant: "destructive"
+          });
+          setIsFetchingLocation(false);
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 5000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      toast({
+        title: "Location Not Available",
+        description: "Your browser doesn't support geolocation. Please enter your address manually.",
+        variant: "destructive"
+      });
+      setIsFetchingLocation(false);
+    }
+  };
 
   // Function to geocode the delivery address
   const geocodeAddress = async (address: string) => {
@@ -513,17 +617,32 @@ const Checkout = () => {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Delivery Address <span className="text-red-500">*</span></FormLabel>
-                            <FormControl>
-                              <Textarea
-                                placeholder="Enter your full address"
-                                className="resize-none"
-                                {...field}
-                                disabled={isProcessing}
-                              />
-                            </FormControl>
-                            {isGeocoding && (
-                              <p className="text-sm text-gray-500 mt-1">Finding address...</p>
-                            )}
+                            <div className="flex gap-2">
+                              <FormControl>
+                                <Textarea
+                                  placeholder="Enter your full address"
+                                  className="resize-none"
+                                  {...field}
+                                  disabled={isProcessing}
+                                />
+                              </FormControl>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={getUserLocation}
+                                className="whitespace-nowrap bg-bhoj-primary text-white hover:bg-bhoj-dark"
+                                disabled={isFetchingLocation}
+                              >
+                                {isFetchingLocation ? (
+                                  <div className="flex items-center">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                    Fetching...
+                                  </div>
+                                ) : (
+                                  "Use My Location"
+                                )}
+                              </Button>
+                            </div>
                           </FormItem>
                         )}
                       />
