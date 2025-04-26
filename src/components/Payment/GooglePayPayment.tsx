@@ -6,22 +6,9 @@ interface GooglePayPaymentProps {
   amount: number;
   onSuccess: (paymentId: string) => void;
   onError: (error?: string) => void;
-  userData?: {
-    name: string;
-    email: string;
-    phone: string;
-  };
-  paymentMethod?: string;
 }
 
-const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({ 
-  amount, 
-  onSuccess, 
-  onError,
-  userData,
-  paymentMethod 
-}) => {
-  // Now you can use userData and paymentMethod in your component
+const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({ amount, onSuccess, onError }) => {
   const [isReady, setIsReady] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,14 +18,14 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({
   useEffect(() => {
     const checkGooglePay = async () => {
       try {
-        if (!(window as any).google?.payments?.api) {
+        if (!window.google?.payments?.api) {
           console.error('Google Pay API not available');
           setError('Google Pay is not available in your browser');
           onError?.('Google Pay is not available in your browser');
           return;
         }
 
-        const paymentsClient = new (window as any).google.payments.api.PaymentsClient({
+        const paymentsClient = new google.payments.api.PaymentsClient({
           environment: 'TEST' // Always use TEST for development
         });
 
@@ -75,7 +62,7 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({
       setIsProcessing(true);
       setError(null);
 
-      if (!(window as any).google?.payments?.api) {
+      if (!window.google?.payments?.api) {
         throw new Error('Google Pay API not available');
       }
 
@@ -83,7 +70,7 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({
       const testMerchantId = '12345678901234567890';
       const testGateway = 'example';
 
-      const paymentsClient = new (window as any).google.payments.api.PaymentsClient({
+      const paymentsClient = new google.payments.api.PaymentsClient({
         environment: 'TEST' // Always use TEST for development
       });
 
