@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft, Plus, Minus, Bike, ShoppingBag, UtensilsCrossed, CreditCard, Wallet, BanknoteIcon } from 'lucide-react';
-import GooglePayPayment from '@/components/payment/GooglePayPayment';
+import GooglePayPayment from '@/components/Payment/GooglePayPayment';
 import MapComponent from '@/components/MapComponent';
 import styles from './Checkout.module.css';
 
