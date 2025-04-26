@@ -124,16 +124,6 @@ const App = () => {
                     <Route index element={<RestaurantDashboard />} />
                     <Route path="menu" element={<RestaurantMenuManagement />} />
                     <Route path="orders" element={<RestaurantOrders />} />
-                    <Route path="schedule" element={
-                      <React.Suspense fallback={<div>Loading...</div>}>
-                        {React.createElement(React.lazy(() => import('./pages/restaurant/Schedule')))}
-                      </React.Suspense>
-                    } />
-                    <Route path="customers" element={
-                      <React.Suspense fallback={<div>Loading...</div>}>
-                        {React.createElement(React.lazy(() => import('./pages/restaurant/Customers')))}
-                      </React.Suspense>
-                    } />
                   </Route>
 
                   {/* Dabbawala Routes */}
@@ -146,26 +136,6 @@ const App = () => {
                     }
                   >
                     <Route index element={<DabbawalaDashboard />} />
-                    <Route path="orders" element={
-                      <React.Suspense fallback={<div>Loading...</div>}>
-                        {React.createElement(React.lazy(() => import('./pages/dabbawala/Orders')))}
-                      </React.Suspense>
-                    } />
-                    <Route path="route" element={
-                      <React.Suspense fallback={<div>Loading...</div>}>
-                        {React.createElement(React.lazy(() => import('./pages/dabbawala/RouteMap')))}
-                      </React.Suspense>
-                    } />
-                    <Route path="navigation" element={
-                      <React.Suspense fallback={<div>Loading...</div>}>
-                        {React.createElement(React.lazy(() => import('./pages/dabbawala/Navigation')))}
-                      </React.Suspense>
-                    } />
-                    <Route path="history" element={
-                      <React.Suspense fallback={<div>Loading...</div>}>
-                        {React.createElement(React.lazy(() => import('./pages/dabbawala/DeliveryHistory')))}
-                      </React.Suspense>
-                    } />
                   </Route>
                   
                   {/* Customer Routes */}
