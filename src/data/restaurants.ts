@@ -79,17 +79,17 @@ export const restaurantsData: { [key: string]: Restaurant } = {
         },
         {
           id: "t2",
-          name: "Maharaja Non-Veg Thali",
+          name: "Rajwadi Special Thali",
           price: 499,
-          isVeg: false,
+          isVeg: true,
           isPopular: true,
           category: "Thali",
-          subCategory: "Deluxe",
-          description: "A complete non-veg thali with chicken curry, mutton, rice, and bread",
-          specialIngredients: "Tender pieces of chicken and mutton, served with yogurt-based curry",
-          spiceLevel: "High",
+          subCategory: "Premium",
+          description: "Premium thali with 6 curries, 3 breads, pulao, and special dessert",
+          specialIngredients: "Special paneer dishes, dry fruits, and traditional sweets",
+          spiceLevel: "Medium",
           portionSize: "Full meal",
-          dietaryInfo: "Non-vegetarian"
+          dietaryInfo: "Pure vegetarian"
         }
       ],
       starters: [
@@ -143,13 +143,13 @@ export const restaurantsData: { [key: string]: Restaurant } = {
       rice: [
         {
           id: "r1",
-          name: "Biryani (Veg)",
+          name: "Veg Biryani",
           price: 250,
           isVeg: true,
           isPopular: true,
           category: "Rice",
           subCategory: "Biryani",
-          description: "Fragrant basmati rice cooked with mixed vegetables",
+          description: "Fragrant basmati rice cooked with mixed vegetables and aromatic spices",
           specialIngredients: "Garnished with fried onions and mint",
           spiceLevel: "Medium",
           portionSize: "Serving for 1",
@@ -157,17 +157,17 @@ export const restaurantsData: { [key: string]: Restaurant } = {
         },
         {
           id: "r2",
-          name: "Mutton Biryani",
-          price: 350,
-          isVeg: false,
+          name: "Paneer Pulao",
+          price: 280,
+          isVeg: true,
           isPopular: true,
           category: "Rice",
-          subCategory: "Biryani",
-          description: "Succulent mutton pieces cooked with aromatic rice and spices",
-          specialIngredients: "Served with raita",
-          spiceLevel: "High",
+          subCategory: "Pulao",
+          description: "Aromatic rice preparation with fresh paneer cubes and mild spices",
+          specialIngredients: "Fresh cottage cheese and saffron",
+          spiceLevel: "Low",
           portionSize: "Serving for 1",
-          dietaryInfo: "Non-vegetarian"
+          dietaryInfo: "Vegetarian"
         }
       ],
       desserts: [

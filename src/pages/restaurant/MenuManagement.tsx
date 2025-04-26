@@ -10,17 +10,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Edit, Trash, Upload, X } from 'lucide-react';
 import { useForm } from "react-hook-form";
+import { Badge } from "@/components/ui/badge";
 
 // Sample menu items data
 const initialMenuItems = [
   {
     id: 1,
-    name: "Paneer Butter Masala",
-    description: "Cottage cheese cubes in a rich tomato and butter gravy",
-    price: 250,
-    image: "https://source.unsplash.com/random/300x200/?curry",
-    category: "main",
+    name: "Royal Maharaja Thali",
+    description: "A grand thali with 4 curries, 2 breads, rice, dessert, and more",
+    shortDescription: "Ghee-laced rotis, seasonal sabzis, served with lassi",
+    price: 450,
+    image: "https://source.unsplash.com/random/300x200/?thali",
+    category: "thali",
     isVeg: true,
+    isPopular: true,
+    spiceLevel: "Medium",
+    portionSize: "Full meal",
     isAvailable: true
   },
   {
@@ -67,9 +72,13 @@ const MenuManagement = () => {
     defaultValues: {
       name: "",
       description: "",
+      shortDescription: "",
       price: "",
       category: "main",
       isVeg: true,
+      isPopular: false,
+      spiceLevel: "Medium",
+      portionSize: "Full meal",
       isAvailable: true,
       image: ""
     }
@@ -179,7 +188,7 @@ const MenuManagement = () => {
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Menu Management</h1>
+        <h1 className="text-2xl font-bold text-gray-800">Menu Management</h1>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-bhoj-primary hover:bg-bhoj-dark">
@@ -192,7 +201,7 @@ const MenuManagement = () => {
               <DialogTitle>{editingItem ? "Edit Menu Item" : "Add New Menu Item"}</DialogTitle>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                 {/* Image Upload */}
                 <FormItem>
                   <FormLabel>Item Image</FormLabel>
@@ -238,7 +247,7 @@ const MenuManagement = () => {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel className="font-medium">Name</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter dish name" {...field} />
                       </FormControl>
@@ -252,9 +261,9 @@ const MenuManagement = () => {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel className="font-medium">Description</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Enter dish description" {...field} />
+                        <Textarea placeholder="Enter dish description" className="min-h-[100px]" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -266,7 +275,7 @@ const MenuManagement = () => {
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price (₹)</FormLabel>
+                      <FormLabel className="font-medium">Price (₹)</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="Enter price" {...field} />
                       </FormControl>
@@ -280,7 +289,7 @@ const MenuManagement = () => {
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
+                      <FormLabel className="font-medium">Category</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -304,10 +313,10 @@ const MenuManagement = () => {
                   control={form.control}
                   name="isVeg"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                      <div className="space-y-0.5">
-                        <FormLabel>Vegetarian</FormLabel>
-                        <FormDescription>
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-1">
+                        <FormLabel className="font-medium">Vegetarian</FormLabel>
+                        <FormDescription className="text-sm text-gray-500">
                           Is this dish vegetarian?
                         </FormDescription>
                       </div>
@@ -325,10 +334,10 @@ const MenuManagement = () => {
                   control={form.control}
                   name="isAvailable"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                      <div className="space-y-0.5">
-                        <FormLabel>Available</FormLabel>
-                        <FormDescription>
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-1">
+                        <FormLabel className="font-medium">Available</FormLabel>
+                        <FormDescription className="text-sm text-gray-500">
                           Is this dish currently available?
                         </FormDescription>
                       </div>
@@ -338,6 +347,93 @@ const MenuManagement = () => {
                           onCheckedChange={field.onChange}
                         />
                       </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="shortDescription"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-medium">Short Description</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Enter a brief description (e.g., serving style, accompaniments)" 
+                          className="min-h-[60px]" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="isPopular"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-1">
+                        <FormLabel className="font-medium">Popular Item</FormLabel>
+                        <FormDescription className="text-sm text-gray-500">
+                          Mark this item as popular?
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="spiceLevel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-medium">Spice Level</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select spice level" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Low">Low</SelectItem>
+                          <SelectItem value="Medium">Medium</SelectItem>
+                          <SelectItem value="High">High</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="portionSize"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-medium">Portion Size</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select portion size" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Small">Small</SelectItem>
+                          <SelectItem value="Regular">Regular</SelectItem>
+                          <SelectItem value="Large">Large</SelectItem>
+                          <SelectItem value="Full meal">Full meal</SelectItem>
+                          <SelectItem value="6 pieces">6 pieces</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -393,18 +489,43 @@ const MenuManagement = () => {
                 <div className={`w-4 h-4 rounded-full ${item.isVeg ? 'bg-green-500' : 'bg-red-500'}`} />
               </div>
             </div>
-            <CardHeader>
-              <CardTitle className="flex justify-between items-center">
-                <span>{item.name}</span>
-                <span className="text-bhoj-primary">₹{item.price}</span>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex justify-between items-center gap-2">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <span className="truncate text-base">{item.name}</span>
+                  {item.isPopular && (
+                    <Badge variant="secondary" className="bg-orange-500 text-white text-xs shrink-0">
+                      Popular
+                    </Badge>
+                  )}
+                </div>
+                <span className="text-bhoj-primary font-bold whitespace-nowrap">₹{item.price}</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-500">{item.description}</p>
-              <div className="mt-2">
-                <span className="inline-block bg-gray-100 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 mr-2">
+            <CardContent className="space-y-3">
+              <div className="space-y-2">
+                <p className="text-sm text-gray-700 line-clamp-2 min-h-[2.5rem]">{item.description}</p>
+                {item.shortDescription && (
+                  <p className="text-sm text-gray-500 italic line-clamp-1">{item.shortDescription}</p>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {item.spiceLevel && (
+                  <Badge variant="outline" className="text-xs px-2 py-0.5 truncate max-w-[8rem]">
+                    {item.spiceLevel} Spice
+                  </Badge>
+                )}
+                {item.portionSize && (
+                  <Badge variant="outline" className="text-xs px-2 py-0.5 truncate max-w-[8rem]">
+                    {item.portionSize}
+                  </Badge>
+                )}
+                <Badge className={`text-xs px-2 py-0.5 truncate max-w-[8rem] ${item.isVeg ? "bg-green-500" : "bg-red-500"} text-white`}>
+                  {item.isVeg ? "Veg" : "Non-Veg"}
+                </Badge>
+                <Badge variant="outline" className="text-xs px-2 py-0.5 truncate max-w-[8rem]">
                   {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
-                </span>
+                </Badge>
               </div>
             </CardContent>
             <CardFooter className="border-t pt-4">

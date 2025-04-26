@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -13,102 +12,267 @@ import {
   StepperItemText,
   StepperItemDescription
 } from '@/components/ui/stepper';
-import { ArrowLeft, Phone, MessageSquare, Clock, CheckCircle, Star } from 'lucide-react';
+import { ArrowLeft, Phone, MessageSquare, Clock, CheckCircle, Star, Loader2 } from 'lucide-react';
+import MapComponent from '@/components/MapComponent';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { restaurantsData } from '@/data/restaurants';
 
-// Mock order data
-const getOrderData = (orderId: string) => {
-  return {
-    id: orderId,
-    status: 'in_transit', // 'placed', 'preparing', 'picked_up', 'in_transit', 'delivered'
-    placedAt: new Date(Date.now() - 40 * 60000), // 40 minutes ago
-    estimatedDelivery: new Date(Date.now() + 15 * 60000), // 15 minutes from now
-    restaurant: {
-      id: 1,
-      name: 'Gujarati Tiffin Service',
-      phone: '+91 98765 43210',
-    },
-    dabbawala: {
-      id: 'D123',
-      name: 'Ramesh Patel',
-      phone: '+91 87654 32109',
-      rating: 4.8,
-      photo: 'https://i.pravatar.cc/150?img=59',
-    },
-    items: [
-      { id: 101, name: 'Standard Gujarati Thali', quantity: 2, price: 150 },
-      { id: 203, name: 'Dal Dhokli', quantity: 1, price: 140 },
-    ],
-    deliveryAddress: '123, Green Residency, Navrangpura, Ahmedabad - 380009',
-    subtotal: 440,
-    deliveryFee: 40,
-    taxes: 22,
-    total: 502,
-    paymentMethod: 'UPI',
-  };
-};
-
-// Status timeline steps
+// Status timeline steps with timing
 const statusSteps = [
-  { key: 'placed', label: 'Order Placed', description: 'Restaurant received your order' },
-  { key: 'preparing', label: 'Preparing', description: 'Food is being prepared' },
-  { key: 'picked_up', label: 'Picked Up', description: 'Dabbawala picked up your order' },
-  { key: 'in_transit', label: 'On the Way', description: 'Your order is on the way' },
-  { key: 'delivered', label: 'Delivered', description: 'Enjoy your meal!' },
+  { 
+    key: 'placed', 
+    label: 'Order Placed', 
+    description: 'Restaurant received your order',
+    duration: 2 * 60 * 1000 // 2 minutes
+  },
+  { 
+    key: 'preparing', 
+    label: 'Preparing', 
+    description: 'Food is being prepared',
+    duration: 15 * 60 * 1000 // 15 minutes
+  },
+  { 
+    key: 'picked_up', 
+    label: 'Picked Up', 
+    description: 'Dabbawala picked up your order',
+    duration: 5 * 60 * 1000 // 5 minutes
+  },
+  { 
+    key: 'in_transit', 
+    label: 'On the Way', 
+    description: 'Your order is on the way',
+    duration: 20 * 60 * 1000 // 20 minutes
+  },
+  { 
+    key: 'delivered', 
+    label: 'Delivered', 
+    description: 'Enjoy your meal!',
+    duration: 0
+  },
 ];
 
+// Restaurant coordinates mapping
+const RESTAURANT_COORDINATES = {
+  'Maharaja Thali House': {
+    latitude: 19.2967,
+    longitude: 72.8504
+  },
+  'Mumbai Tiffin Service': {
+    latitude: 59.2967,
+    longitude: 42.8504
+  },
+  'Vada Pav Corner': {
+    latitude: 19.1467,
+    longitude: 72.8489
+  },
+  'Punjabi Dhaba': {
+    latitude: 19.0176,
+    longitude: 72.8285
+  }
+};
+
+// Default coordinates (Mumbai)
+const DEFAULT_COORDINATES = {
+  latitude: 19.0760,
+  longitude: 72.8777
+};
+
 const OrderTracking = () => {
-  const { orderId } = useParams<{ orderId: string }>();
-  const [order, setOrder] = useState<any>(null);
+  const { orderId } = useParams();
+  const location = useLocation();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [order, setOrder] = useState<any>(location.state?.orderData || null);
   const [activeStep, setActiveStep] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [estimatedDeliveryTime, setEstimatedDeliveryTime] = useState<Date | null>(null);
+  
+  // Get restaurant coordinates from our data
+  const getRestaurantCoordinates = (restaurantName: string) => {
+    const restaurant = Object.values(restaurantsData).find(r => r.name === restaurantName);
+    return restaurant?.coordinates || null;
+  };
   
   // Function to get current step index
   const getCurrentStepIndex = (status: string) => {
     return statusSteps.findIndex(step => step.key === status);
   };
-  
-  // Get order data and set active step
+
+  // Calculate total remaining time for delivery
+  const calculateRemainingTime = (currentStep: number) => {
+    return statusSteps
+      .slice(currentStep)
+      .reduce((total, step) => total + step.duration, 0);
+  };
+
+  // Update order status with simulated progress
   useEffect(() => {
-    if (orderId) {
-      const data = getOrderData(orderId);
-      setOrder(data);
-      setActiveStep(getCurrentStepIndex(data.status));
-      
-      // Simulate order progress for demo
-      const timer = setTimeout(() => {
-        const nextStatus = 
-          data.status === 'placed' ? 'preparing' :
-          data.status === 'preparing' ? 'picked_up' :
-          data.status === 'picked_up' ? 'in_transit' :
-          data.status === 'in_transit' ? 'delivered' :
-          data.status;
-        
-        setOrder({...data, status: nextStatus});
-        setActiveStep(getCurrentStepIndex(nextStatus));
-      }, 20000);
-      
-      return () => clearTimeout(timer);
+    if (!order) {
+      setIsLoading(false);
+      return;
     }
-  }, [orderId]);
+
+    setIsLoading(true);
+
+    // Set initial estimated delivery time
+    if (!estimatedDeliveryTime) {
+      const totalTime = calculateRemainingTime(0);
+      const estimatedTime = new Date(Date.now() + totalTime);
+      setEstimatedDeliveryTime(estimatedTime);
+    }
+
+    const currentStep = getCurrentStepIndex(order.status);
+    setActiveStep(currentStep);
+
+    // Don't continue if order is delivered
+    if (order.status === 'delivered') {
+      setIsLoading(false);
+      return;
+    }
+
+    // Simulate order progress
+    const timer = setTimeout(() => {
+      const nextStep = currentStep + 1;
+      if (nextStep < statusSteps.length) {
+        const nextStatus = statusSteps[nextStep].key;
+        setOrder(prev => ({
+          ...prev,
+          status: nextStatus,
+          dabbawala: {
+            ...prev.dabbawala,
+            coordinates: simulateNewDabbawalaCordinates(prev, nextStep)
+          }
+        }));
+      }
+    }, statusSteps[currentStep].duration / 10); // Speed up simulation by factor of 10
+
+    setIsLoading(false);
+
+    return () => clearTimeout(timer);
+  }, [order?.status]);
+
+  // Simulate dabbawala movement
+  const simulateNewDabbawalaCordinates = (currentOrder: any, step: number) => {
+    const restaurantCoords = getRestaurantCoordinates(currentOrder.restaurant.name);
+    const deliveryCoords = currentOrder.deliveryAddress.coordinates;
+    
+    if (!restaurantCoords || !deliveryCoords) return currentOrder.dabbawala.coordinates;
+
+    // Calculate intermediate positions based on step
+    const progress = (step - 2) / 2; // Steps 2-4 represent movement
+    return {
+      latitude: restaurantCoords.latitude + (deliveryCoords.latitude - restaurantCoords.latitude) * progress,
+      longitude: restaurantCoords.longitude + (deliveryCoords.longitude - restaurantCoords.longitude) * progress
+    };
+  };
+
+  // Fetch order data if not available in location state
+  useEffect(() => {
+    const fetchOrder = async () => {
+      if (!location.state?.orderData && orderId) {
+        try {
+          setIsLoading(true);
+          setError(null);
+          const response = await fetch(`/api/orders/${orderId}`, {
+            headers: {
+              'Authorization': `Bearer ${user?.id}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch order');
+          }
+
+          const orderData = await response.json();
+          setOrder(orderData);
+          setActiveStep(getCurrentStepIndex(orderData.status));
+        } catch (error) {
+          console.error('Error fetching order:', error);
+          setError('Failed to load order details. Please try again.');
+          toast({
+            title: "Error",
+            description: "Failed to load order details. Please try again.",
+            variant: "destructive"
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchOrder();
+  }, [orderId, location.state?.orderData, user?.id, toast]);
   
-  if (!order) {
+  // Subscribe to real-time order updates
+  useEffect(() => {
+    if (order) {
+      const ws = new WebSocket(`ws://your-websocket-url/orders/${order.id}`);
+
+      ws.onmessage = (event) => {
+        const updatedOrder = JSON.parse(event.data);
+        setOrder(updatedOrder);
+        setActiveStep(getCurrentStepIndex(updatedOrder.status));
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      return () => {
+        ws.close();
+      };
+    }
+  }, [order?.id]);
+  
+  if (error) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
-        <p>Loading order details...</p>
+        <h1 className="text-2xl font-bold mb-4">Error</h1>
+        <p className="text-gray-600 mb-6">{error}</p>
+        <Link to="/">
+          <Button className="bg-bhoj-primary hover:bg-bhoj-dark">
+            Back to Home
+          </Button>
+        </Link>
       </div>
     );
   }
   
-  const formattedDate = new Intl.DateTimeFormat('en-US', {
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: true,
-  }).format(order.placedAt);
+  if (!order || isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-bhoj-primary" />
+      </div>
+    );
+  }
+
+  // Format dates safely
+  const formatDate = (dateString: string | Date | undefined) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Invalid Date';
+      return new Intl.DateTimeFormat('en-US', {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+      }).format(date);
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date';
+    }
+  };
   
-  const estimatedTime = new Intl.DateTimeFormat('en-US', {
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: true,
-  }).format(order.estimatedDelivery);
+  const formattedDate = formatDate(order.placedAt);
+  const estimatedTime = estimatedDeliveryTime 
+    ? new Intl.DateTimeFormat('en-US', {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+      }).format(estimatedDeliveryTime)
+    : 'Calculating...';
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -119,8 +283,8 @@ const OrderTracking = () => {
       
       <h1 className="text-2xl font-bold mb-6">Order Tracking</h1>
       
-      <div className="grid gap-6 md:grid-cols-5">
-        <div className="md:col-span-3 space-y-6">
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="md:col-span-1 space-y-6">
           {/* Order Status */}
           <Card>
             <CardHeader>
@@ -159,8 +323,8 @@ const OrderTracking = () => {
                           <div className={`h-3 w-3 rounded-full ${index === activeStep ? 'bg-bhoj-primary' : 'bg-gray-300'}`} />
                         )}
                       </StepperItemIndicator>
-                      <StepperItemText>{step.label}</StepperItemText>
-                      <StepperItemDescription>{step.description}</StepperItemDescription>
+                      <StepperItemText style={{paddingLeft: '32px'}}>{step.label}</StepperItemText>
+                      <StepperItemDescription style={{paddingLeft: '32px'}}>{step.description}</StepperItemDescription>
                       {index < statusSteps.length - 1 && <StepperConnector />}
                     </StepperItem>
                   ))}
@@ -209,15 +373,50 @@ const OrderTracking = () => {
             </Card>
           )}
           
-          {/* Map Placeholder (Would be replaced with actual Google Maps) */}
+          {/* Map Component */}
           <Card>
             <CardContent className="p-0">
-              <div className="aspect-video bg-gray-200 flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-gray-500">Map Placeholder</p>
-                  <p className="text-sm text-gray-400">Google Maps would be integrated here</p>
-                </div>
-              </div>
+              <MapComponent
+                initialViewState={{
+                  longitude: getRestaurantCoordinates(order?.restaurant?.name)?.longitude || DEFAULT_COORDINATES.longitude,
+                  latitude: getRestaurantCoordinates(order?.restaurant?.name)?.latitude || DEFAULT_COORDINATES.latitude,
+                  zoom: 14
+                }}
+                markers={[
+                  {
+                    longitude: getRestaurantCoordinates(order?.restaurant?.name)?.longitude || DEFAULT_COORDINATES.longitude,
+                    latitude: getRestaurantCoordinates(order?.restaurant?.name)?.latitude || DEFAULT_COORDINATES.latitude,
+                    title: order?.restaurant?.name || "Restaurant Location",
+                    type: "restaurant" as const
+                  },
+                  {
+                    longitude: order?.dabbawala?.coordinates.longitude || DEFAULT_COORDINATES.longitude,
+                    latitude: order?.dabbawala?.coordinates.latitude || DEFAULT_COORDINATES.latitude,
+                    title: `Dabbawala: ${order?.dabbawala?.name}`,
+                    type: "dabbawala" as const
+                  },
+                  {
+                    longitude: order?.deliveryAddress?.coordinates.longitude || DEFAULT_COORDINATES.longitude,
+                    latitude: order?.deliveryAddress?.coordinates.latitude || DEFAULT_COORDINATES.latitude,
+                    title: "Delivery Address",
+                    type: "delivery" as const
+                  }
+                ]}
+                route={order ? {
+                  start: [
+                    getRestaurantCoordinates(order?.restaurant?.name)?.latitude || DEFAULT_COORDINATES.latitude,
+                    getRestaurantCoordinates(order?.restaurant?.name)?.longitude || DEFAULT_COORDINATES.longitude
+                  ],
+                  waypoints: [[
+                    order?.dabbawala?.coordinates.latitude || DEFAULT_COORDINATES.latitude,
+                    order?.dabbawala?.coordinates.longitude || DEFAULT_COORDINATES.longitude
+                  ]],
+                  end: [
+                    order?.deliveryAddress?.coordinates.latitude || DEFAULT_COORDINATES.latitude,
+                    order?.deliveryAddress?.coordinates.longitude || DEFAULT_COORDINATES.longitude
+                  ]
+                } : undefined}
+              />
             </CardContent>
           </Card>
         </div>
@@ -269,7 +468,7 @@ const OrderTracking = () => {
               <div className="space-y-2">
                 <div>
                   <p className="text-sm text-gray-500">Delivery Address</p>
-                  <p className="mt-1">{order.deliveryAddress}</p>
+                  <p className="mt-1">{order.deliveryAddress.text}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Payment Method</p>

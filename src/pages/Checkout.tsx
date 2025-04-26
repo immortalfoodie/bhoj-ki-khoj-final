@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -11,6 +12,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft, Plus, Minus, Bike, ShoppingBag, UtensilsCrossed, CreditCard, Wallet, BanknoteIcon } from 'lucide-react';
+import GooglePayPayment from '@/components/payment/GooglePayPayment';
+import MapComponent from '@/components/MapComponent';
+import styles from './Checkout.module.css';
+
+// MapTiler API key
+const MAPTILER_API_KEY = 'nBGyxyC6zgNRG9zTuW5B';
 
 const deliveryOptions = [
   { id: 'dabbawala', name: 'Dabbawala Delivery', icon: <Bike className="h-5 w-5" />, description: 'Delivered by our trusted dabbawala network' },
@@ -26,9 +33,14 @@ const paymentOptions = [
 
 const Checkout = () => {
   const { items, updateQuantity, removeFromCart, clearCart, getCartTotal } = useCart();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [deliveryCoordinates, setDeliveryCoordinates] = useState<[number, number] | null>(null);
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   const form = useForm({
     defaultValues: {
@@ -39,6 +51,74 @@ const Checkout = () => {
     }
   });
   
+  // Get restaurant coordinates from the first item in cart
+  const restaurantCoordinates = items[0]?.restaurantCoordinates || {
+    latitude: 19.0760,
+    longitude: 72.8777
+  };
+
+  // Scroll to top and lock scroll when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.body.style.overflow = 'hidden';
+    
+    // Cleanup function to restore scroll when component unmounts
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
+  // Function to geocode the delivery address
+  const geocodeAddress = async (address: string) => {
+    try {
+      setIsGeocoding(true);
+      setError(null);
+      const response = await fetch(
+        `https://api.maptiler.com/geocoding/${encodeURIComponent(address)}.json?key=${MAPTILER_API_KEY}`
+      );
+      const data = await response.json();
+      
+      if (data.features && data.features.length > 0) {
+        const [longitude, latitude] = data.features[0].center;
+        setDeliveryCoordinates([latitude, longitude]);
+        return [latitude, longitude];
+      }
+      setError('Could not find the address. Please check and try again.');
+      return null;
+    } catch (error) {
+      console.error('Error geocoding address:', error);
+      setError('Error finding address. Please try again.');
+      return null;
+    } finally {
+      setIsGeocoding(false);
+    }
+  };
+
+  // Watch for address changes
+  useEffect(() => {
+    const address = form.watch('address');
+    if (address && form.watch('deliveryOption') === 'dabbawala') {
+      const timeoutId = setTimeout(() => {
+        geocodeAddress(address);
+      }, 1000); // Debounce for 1 second
+      return () => clearTimeout(timeoutId);
+    }
+  }, [form.watch('address')]);
+
+  if (!user || !profile) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-bold mb-4">Please Login</h1>
+        <p className="text-gray-600 mb-6">You need to be logged in to proceed with checkout.</p>
+        <Link to="/login">
+          <Button className="bg-bhoj-primary hover:bg-bhoj-dark">
+            Login
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
   if (items.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
@@ -75,32 +155,243 @@ const Checkout = () => {
     }
   };
   
-  const onSubmit = (data: any) => {
-    setIsProcessing(true);
-    
-    // Simulate order processing
-    setTimeout(() => {
-      const orderId = Math.floor(Math.random() * 10000);
+  const handlePaymentSuccess = async (paymentId: string) => {
+    try {
+      setIsProcessing(true);
+      setError(null);
+
+      // Validate required data
+      if (!user || !profile) {
+        throw new Error('User data is missing');
+      }
+
+      if (!items.length) {
+        throw new Error('Cart is empty');
+      }
+
+      if (form.getValues('deliveryOption') === 'dabbawala' && !form.getValues('address')) {
+        throw new Error('Delivery address is required');
+      }
+
+      // Create order on backend
+      const orderData = {
+        id: Math.floor(Math.random() * 10000),
+        status: 'placed',
+        placedAt: new Date(),
+        estimatedDelivery: new Date(Date.now() + 20 * 60000),
+        restaurant: {
+          id: items[0]?.restaurantId,
+          name: items[0]?.restaurantName,
+          phone: '+91 98765 43210',
+          coordinates: items[0]?.restaurantCoordinates || {
+            latitude: 19.0760,
+            longitude: 72.8777
+          }
+        },
+        dabbawala: {
+          id: 'D123',
+          name: 'Ramesh Patel',
+          phone: '+91 87654 32109',
+          rating: 4.8,
+          photo: 'https://i.pravatar.cc/150?img=59',
+          coordinates: {
+            latitude: 19.0755,
+            longitude: 72.8775
+          }
+        },
+        deliveryAddress: {
+          text: form.getValues('address'),
+          coordinates: deliveryCoordinates || {
+            latitude: 19.0750,
+            longitude: 72.8770
+          }
+        },
+        items: items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          restaurantId: item.restaurantId,
+          restaurantName: item.restaurantName,
+          image: item.image,
+          description: item.description,
+          isVeg: item.isVeg,
+          spiceLevel: item.spiceLevel,
+          portionSize: item.portionSize,
+          specialIngredients: item.specialIngredients
+        })),
+        subtotal: subtotal,
+        deliveryFee: deliveryFee,
+        taxes: taxes,
+        total: total,
+        paymentMethod: form.getValues('paymentMethod'),
+        paymentId: paymentId,
+        userId: user.id,
+        userProfile: {
+          name: profile.name,
+          email: profile.email,
+          phone: profile.phone
+        },
+        notes: form.getValues('notes') || '',
+        deliveryOption: form.getValues('deliveryOption')
+      };
+
+      // Validate order data
+      if (!orderData.restaurant.id || !orderData.restaurant.name) {
+        throw new Error('Restaurant information is missing');
+      }
+
+      if (!orderData.items.length) {
+        throw new Error('Order items are missing');
+      }
+
+      if (!orderData.userId || !orderData.userProfile.name) {
+        throw new Error('User information is missing');
+      }
+
+      // For test environment, we'll simulate order creation
+      // In production, this would be an API call
+      const createdOrder = {
+        ...orderData,
+        id: Math.floor(Math.random() * 10000),
+        status: 'placed',
+        placedAt: new Date().toISOString(),
+        estimatedDelivery: new Date(Date.now() + 20 * 60000).toISOString()
+      };
+      
+      // Clear cart and update state
       clearCart();
       setIsProcessing(false);
-      
+      setShowPayment(false);
+
+      // Show success message
       toast({
-        title: "Order Placed Successfully!",
-        description: `Your order #${orderId} has been placed`,
+        title: "Order Placed Successfully",
+        description: "Your order has been placed and is being processed.",
       });
+
+      // Navigate to order tracking
+      navigate(`/track/${createdOrder.id}`, { state: { orderData: createdOrder } });
+    } catch (error) {
+      console.error('Error creating order:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create order. Please try again.';
+      setError(errorMessage);
+      setIsProcessing(false);
+      setShowPayment(false);
+      toast({
+        title: "Order Failed",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handlePaymentError = (error: string) => {
+    setIsProcessing(false);
+    setShowPayment(false);
+    setError(error);
+    toast({
+      title: "Payment Failed",
+      description: error,
+      variant: "destructive"
+    });
+  };
+
+  const onSubmit = async (data: any) => {
+    try {
+      setError(null);
       
-      navigate(`/track/${orderId}`);
-    }, 2000);
+      // Validate delivery address
+      if (data.deliveryOption === 'dabbawala' && !data.address.trim()) {
+        toast({
+          title: "Delivery Address Required",
+          description: "Please enter your delivery address to continue.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (data.deliveryOption === 'dabbawala' && !deliveryCoordinates) {
+        toast({
+          title: "Invalid Address",
+          description: "Please enter a valid delivery address.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Validate cart
+      if (!items.length) {
+        toast({
+          title: "Empty Cart",
+          description: "Your cart is empty. Please add items before proceeding.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Validate user data
+      if (!user || !profile) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to complete your order.",
+          variant: "destructive"
+        });
+        navigate('/login', { state: { from: '/checkout' } });
+        return;
+      }
+
+      setIsProcessing(true);
+
+      // Handle different payment methods
+      switch (data.paymentMethod) {
+        case 'upi':
+          setShowPayment(true);
+          break;
+        case 'card':
+          // Simulate card payment
+          try {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            const mockPaymentId = `CARD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            await handlePaymentSuccess(mockPaymentId);
+          } catch (error) {
+            handlePaymentError('Card payment failed. Please try again.');
+          }
+          break;
+        case 'cod':
+          // Handle cash on delivery
+          try {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const mockPaymentId = `COD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            await handlePaymentSuccess(mockPaymentId);
+          } catch (error) {
+            handlePaymentError('Failed to process cash on delivery order.');
+          }
+          break;
+        default:
+          handlePaymentError('Invalid payment method selected.');
+      }
+    } catch (error) {
+      console.error('Error in form submission:', error);
+      setError('An error occurred. Please try again.');
+      setIsProcessing(false);
+    }
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6 h-screen">
       <Link to="/" className="inline-flex items-center text-bhoj-primary mb-4">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Continue Shopping
       </Link>
       
       <h1 className="text-2xl font-bold mb-6">Checkout</h1>
+      
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
+          {error}
+        </div>
+      )}
       
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-2 space-y-6">
@@ -122,6 +413,7 @@ const Checkout = () => {
                         size="sm"
                         className="h-8 w-8 rounded-full p-0"
                         onClick={() => handleDecreaseQuantity(item.id)}
+                        disabled={isProcessing}
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
@@ -131,6 +423,7 @@ const Checkout = () => {
                         size="sm"
                         className="h-8 w-8 rounded-full p-0"
                         onClick={() => handleIncreaseQuantity(item.id)}
+                        disabled={isProcessing}
                       >
                         <Plus className="h-3 w-3" />
                       </Button>
@@ -163,6 +456,7 @@ const Checkout = () => {
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                           className="space-y-3"
+                          disabled={isProcessing}
                         >
                           {deliveryOptions.map((option) => (
                             <FormItem key={option.id} className="flex items-center space-x-3 space-y-0">
@@ -186,23 +480,58 @@ const Checkout = () => {
                   />
                   
                   {form.watch('deliveryOption') === 'dabbawala' && (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       <FormField
                         control={form.control}
                         name="address"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Delivery Address</FormLabel>
+                            <FormLabel>Delivery Address <span className="text-red-500">*</span></FormLabel>
                             <FormControl>
                               <Textarea
                                 placeholder="Enter your full address"
                                 className="resize-none"
                                 {...field}
+                                disabled={isProcessing}
                               />
                             </FormControl>
+                            {isGeocoding && (
+                              <p className="text-sm text-gray-500 mt-1">Finding address...</p>
+                            )}
                           </FormItem>
                         )}
                       />
+                      
+                      {/* Map Component */}
+                      <div className="rounded-lg overflow-hidden border border-gray-200">
+                        <div className="overflow-hidden">
+                          <MapComponent
+                            initialViewState={{
+                              longitude: restaurantCoordinates.longitude,
+                              latitude: restaurantCoordinates.latitude,
+                              zoom: 14
+                            }}
+                            markers={[
+                              {
+                                longitude: restaurantCoordinates.longitude,
+                                latitude: restaurantCoordinates.latitude,
+                                title: items[0]?.restaurantName || "Restaurant Location",
+                                type: "restaurant" as const
+                              },
+                              ...(deliveryCoordinates ? [{
+                                longitude: deliveryCoordinates[1],
+                                latitude: deliveryCoordinates[0],
+                                title: "Delivery Address",
+                                type: "delivery" as const
+                              }] : [])
+                            ]}
+                            route={deliveryCoordinates ? {
+                              start: [restaurantCoordinates.latitude, restaurantCoordinates.longitude],
+                              end: [deliveryCoordinates[0], deliveryCoordinates[1]]
+                            } : undefined}
+                          />
+                        </div>
+                      </div>
                     </div>
                   )}
                   
@@ -217,6 +546,7 @@ const Checkout = () => {
                             placeholder="Any special instructions..."
                             className="resize-none"
                             {...field}
+                            disabled={isProcessing}
                           />
                         </FormControl>
                       </FormItem>
@@ -235,6 +565,7 @@ const Checkout = () => {
                             onValueChange={field.onChange}
                             defaultValue={field.value}
                             className="space-y-3"
+                            disabled={isProcessing}
                           >
                             {paymentOptions.map((option) => (
                               <FormItem key={option.id} className="flex items-center space-x-3 space-y-0">
@@ -289,7 +620,7 @@ const Checkout = () => {
               <Button
                 className="w-full bg-bhoj-primary hover:bg-bhoj-dark"
                 onClick={form.handleSubmit(onSubmit)}
-                disabled={isProcessing}
+                disabled={isProcessing || (form.watch('deliveryOption') === 'dabbawala' && !form.watch('address').trim())}
               >
                 {isProcessing ? "Processing..." : "Place Order"}
               </Button>
@@ -297,6 +628,21 @@ const Checkout = () => {
           </Card>
         </div>
       </div>
+
+      {/* Google Pay Payment Modal */}
+      {showPayment && form.watch('paymentMethod') === 'upi' && (
+        <GooglePayPayment
+          amount={total}
+          onSuccess={handlePaymentSuccess}
+          onError={handlePaymentError}
+          userData={{
+            name: profile.name,
+            email: profile.email,
+            phone: profile.phone
+          }}
+          paymentMethod={form.watch('paymentMethod')}
+        />
+      )}
     </div>
   );
 };
