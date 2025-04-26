@@ -21,6 +21,7 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({
   userData,
   paymentMethod 
 }) => {
+  // Now you can use userData and paymentMethod in your component
   const [isReady, setIsReady] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,12 +29,6 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({
   const { toast } = useToast();
 
   useEffect(() => {
-    // Skip Google Pay API check in production environment to avoid WebSocket errors
-    if (window.location.hostname !== 'localhost') {
-      setIsReady(true);
-      return;
-    }
-    
     const checkGooglePay = async () => {
       try {
         if (!(window as any).google?.payments?.api) {
@@ -80,12 +75,56 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({
       setIsProcessing(true);
       setError(null);
 
-      // Always use simulation in production to avoid WebSocket errors
-      // Generate a random payment ID for demo purposes
-      const paymentId = 'PAY-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+      if (!(window as any).google?.payments?.api) {
+        throw new Error('Google Pay API not available');
+      }
+
+      // For testing purposes, use a fixed merchant ID and gateway
+      const testMerchantId = '12345678901234567890';
+      const testGateway = 'example';
+
+      const paymentsClient = new (window as any).google.payments.api.PaymentsClient({
+        environment: 'TEST' // Always use TEST for development
+      });
+
+      const paymentDataRequest = {
+        apiVersion: 2,
+        apiVersionMinor: 0,
+        allowedPaymentMethods: [{
+          type: 'CARD',
+          parameters: {
+            allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+            allowedCardNetworks: ['MASTERCARD', 'VISA', 'AMEX', 'DISCOVER', 'JCB']
+          },
+          tokenizationSpecification: {
+            type: 'PAYMENT_GATEWAY',
+            parameters: {
+              gateway: testGateway,
+              gatewayMerchantId: testMerchantId
+            }
+          }
+        }],
+        merchantInfo: {
+          merchantId: testMerchantId,
+          merchantName: 'Bhoj Basket Test Store'
+        },
+        transactionInfo: {
+          totalPriceStatus: 'FINAL',
+          totalPrice: amount.toFixed(2),
+          currencyCode: 'INR',
+          countryCode: 'IN'
+        },
+        // Add callback intents for better error handling
+        callbackIntents: ['PAYMENT_AUTHORIZATION']
+      };
+
+      // For demo purposes, simulate a successful payment without actually calling Google Pay
+      // This avoids the OR_BIBED_11 error in development
       
-      // Simulate processing time
+      // Comment this out for production:
       setTimeout(() => {
+        // Generate a random payment ID for demo purposes
+        const paymentId = 'PAY-' + Math.random().toString(36).substr(2, 9).toUpperCase();
         onSuccess(paymentId);
         
         toast({
@@ -94,6 +133,24 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({
         });
         setIsProcessing(false);
       }, 2000);
+      
+      // Uncomment this for production:
+      /*
+      const paymentData = await paymentsClient.loadPaymentData(paymentDataRequest);
+      
+      if (!paymentData?.paymentMethodData?.tokenizationData?.token) {
+        throw new Error('Invalid payment data received');
+      }
+
+      // In production, send the token to your server for processing
+      const paymentId = 'PAY-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+      onSuccess(paymentId);
+      
+      toast({
+        title: 'Payment Successful',
+        description: 'Your payment has been processed successfully',
+      });
+      */
       
     } catch (error) {
       console.error('Payment error:', error);
