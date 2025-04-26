@@ -147,6 +147,7 @@ const App = () => {
                   {/* Redirect legacy routes */}
                   <Route path="/login" element={<Navigate to="/auth/login" replace />} />
                   <Route path="/register" element={<Navigate to="/auth/register" replace />} />
+                  <Route path="/home" element={<Navigate to="/" replace />} />
                   
                   {/* Not Found */}
                   <Route path="*" element={<NotFound />} />
