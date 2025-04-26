@@ -44,6 +44,8 @@ import RestaurantOrders from "@/pages/restaurant/Orders";
 
 // Dabbawala Pages
 import DabbawalaDashboard from "@/pages/dabbawala/Dashboard";
+import AnalyticsPage from './pages/admin/Analytics';
+import UsersPage from './pages/admin/Users';
 
 const App = () => {
   // Create a client
@@ -96,6 +98,16 @@ const App = () => {
                     <Route path="dabbawalas" element={<DabbawalaManagement />} />
                     <Route path="orders" element={<OrderManagement />} />
                     <Route path="menu" element={<MenuManagement />} />
+                    <Route path="users" element={
+                      <React.Suspense fallback={<div>Loading...</div>}>
+                        <UsersPage />
+                      </React.Suspense>
+                    } />
+                    <Route path="analytics" element={
+                      <React.Suspense fallback={<div>Loading...</div>}>
+                        <AnalyticsPage/>
+                      </React.Suspense>
+                    } />
                     <Route path="settings" element={<AppSettings />} />
                     <Route path="feedback" element={<Feedback />} />
                   </Route>
