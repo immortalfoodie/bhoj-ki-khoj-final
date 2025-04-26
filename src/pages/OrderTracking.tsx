@@ -208,7 +208,8 @@ const OrderTracking = () => {
   // Subscribe to real-time order updates
   useEffect(() => {
     if (order) {
-      const ws = new WebSocket(`ws://your-websocket-url/orders/${order.id}`);
+      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      const ws = new WebSocket(`${protocol}://your-websocket-url/orders/${order.id}`);
 
       ws.onmessage = (event) => {
         const updatedOrder = JSON.parse(event.data);
