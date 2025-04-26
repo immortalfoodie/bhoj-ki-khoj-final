@@ -33,7 +33,7 @@ const paymentOptions = [
 
 const Checkout = () => {
   const { items, updateQuantity, removeFromCart, clearCart, getCartTotal } = useCart();
-  const { user, profile } = useAuth();
+  const { user, profile, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -41,6 +41,7 @@ const Checkout = () => {
   const [deliveryCoordinates, setDeliveryCoordinates] = useState<[number, number] | null>(null);
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userData, setUserData] = useState<{ user: any; profile: any } | null>(null);
   
   const form = useForm({
     defaultValues: {
@@ -67,6 +68,22 @@ const Checkout = () => {
       document.body.style.overflow = 'auto';
     };
   }, []);
+
+  // Effect to sync user data
+  useEffect(() => {
+    if (user && profile) {
+      setUserData({ user, profile });
+      console.log('User data synced:', { user, profile });
+    }
+  }, [user, profile]);
+
+  // Effect to check authentication on mount
+  useEffect(() => {
+    if (!isAuthenticated) {
+      console.log('User not authenticated, redirecting to login');
+      navigate('/login', { state: { from: '/checkout' } });
+    }
+  }, [isAuthenticated, navigate]);
 
   // Function to geocode the delivery address
   const geocodeAddress = async (address: string) => {
@@ -160,12 +177,17 @@ const Checkout = () => {
       setIsProcessing(true);
       setError(null);
 
-      // Validate required data
-      if (!user) {
+      // Debug user data
+      console.log('User data in handlePaymentSuccess:', { user, profile, userData });
+      
+      // Validate required data with more detailed error messages
+      if (!user || !userData?.user) {
+        console.error('User is null or undefined');
         throw new Error('User data is missing. Please log in again.');
       }
       
-      if (!profile) {
+      if (!profile || !userData?.profile) {
+        console.error('Profile is null or undefined');
         throw new Error('User profile is missing. Please log in again.');
       }
 
@@ -177,7 +199,7 @@ const Checkout = () => {
         throw new Error('Delivery address is required');
       }
 
-      // Create order on backend
+      // Create order on backend with validated user data
       const orderData = {
         id: Math.floor(Math.random() * 10000),
         status: 'placed',
@@ -204,7 +226,7 @@ const Checkout = () => {
           }
         },
         deliveryAddress: {
-          text: form.getValues('address'),
+          address: form.getValues('address'),
           coordinates: deliveryCoordinates || {
             latitude: 19.0750,
             longitude: 72.8770
@@ -230,11 +252,11 @@ const Checkout = () => {
         total: total,
         paymentMethod: form.getValues('paymentMethod'),
         paymentId: paymentId,
-        userId: user.id,
+        userId: userData.user.id,
         userProfile: {
-          name: profile.name,
-          email: profile.email,
-          phone: profile.phone
+          name: userData.profile.name,
+          email: userData.profile.email,
+          phone: userData.profile.phone
         },
         notes: form.getValues('notes') || '',
         deliveryOption: form.getValues('deliveryOption')

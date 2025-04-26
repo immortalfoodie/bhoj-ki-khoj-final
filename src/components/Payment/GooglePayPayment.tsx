@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface GooglePayPaymentProps {
   amount: number;
   onSuccess: (paymentId: string) => void;
-  onError: () => void;
+  onError: (error?: string) => void;
   userData?: {
     name: string;
     email: string;
@@ -20,81 +21,71 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({
   userData,
   paymentMethod
 }) => {
-  const { toast } = useToast();
-  const [isGooglePayReady, setIsGooglePayReady] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { user, profile } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
-    const initializeGooglePay = async () => {
+    const checkGooglePay = async () => {
       try {
-        // Wait for Google Pay API to load with a timeout
-        await new Promise((resolve, reject) => {
-          if ((window as any).google?.payments?.api?.PaymentsClient) {
-            resolve(true);
-          } else {
-            const checkGooglePay = setInterval(() => {
-              if ((window as any).google?.payments?.api?.PaymentsClient) {
-                clearInterval(checkGooglePay);
-                resolve(true);
-              }
-            }, 100);
-            
-            // Set a timeout of 10 seconds
-            setTimeout(() => {
-              clearInterval(checkGooglePay);
-              reject(new Error('Google Pay API failed to load'));
-            }, 10000);
-          }
-        });
+        if (!window.google?.payments?.api) {
+          console.error('Google Pay API not available');
+          onError?.('Google Pay is not available in your browser');
+          return;
+        }
 
-        const client = new (window as any).google.payments.api.PaymentsClient({
+        const paymentsClient = new google.payments.api.PaymentsClient({
           environment: 'TEST'
         });
 
-        const isReady = await client.isReadyToPay({
+        const isReadyToPay = await paymentsClient.isReadyToPay({
           apiVersion: 2,
           apiVersionMinor: 0,
           allowedPaymentMethods: [{
             type: 'CARD',
             parameters: {
               allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
-              allowedCardNetworks: ['VISA', 'MASTERCARD']
+              allowedCardNetworks: ['MASTERCARD', 'VISA']
+            },
+            tokenizationSpecification: {
+              type: 'PAYMENT_GATEWAY',
+              parameters: {
+                gateway: 'example',
+                gatewayMerchantId: 'exampleGatewayMerchantId'
+              }
             }
           }]
         });
 
-        setIsGooglePayReady(isReady.result);
-        
-        if (!isReady.result) {
-          setError('Google Pay is not available on this device');
-          toast({
-            title: "Google Pay Not Available",
-            description: "Google Pay is not available on this device. Please try a different payment method.",
-            variant: "destructive"
-          });
+        setIsReady(isReadyToPay.result);
+        if (!isReadyToPay.result) {
+          console.log('Google Pay is not ready:', isReadyToPay);
+          onError?.('Google Pay is not available for your device');
         }
       } catch (error) {
-        console.error('Google Pay initialization error:', error);
-        setError('Failed to initialize Google Pay');
-        toast({
-          title: "Google Pay Not Available",
-          description: "Google Pay is not available on this device. Please try a different payment method.",
-          variant: "destructive"
-        });
-        onError();
+        console.error('Error checking Google Pay availability:', error);
+        onError?.('Failed to initialize Google Pay');
       }
     };
 
-    initializeGooglePay();
-  }, [onError, toast]);
+    checkGooglePay();
+  }, [onError]);
 
   const handlePayment = async () => {
     try {
       setIsProcessing(true);
-      setError(null);
-      
-      const client = new (window as any).google.payments.api.PaymentsClient({
+
+      // Validate user state
+      if (!user || !profile) {
+        throw new Error('User authentication required');
+      }
+
+      if (!window.google?.payments?.api) {
+        throw new Error('Google Pay API not available');
+      }
+
+      const paymentsClient = new google.payments.api.PaymentsClient({
         environment: 'TEST'
       });
 
@@ -105,7 +96,7 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({
           type: 'CARD',
           parameters: {
             allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
-            allowedCardNetworks: ['VISA', 'MASTERCARD']
+            allowedCardNetworks: ['MASTERCARD', 'VISA']
           },
           tokenizationSpecification: {
             type: 'PAYMENT_GATEWAY',
@@ -121,46 +112,61 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({
         },
         transactionInfo: {
           totalPriceStatus: 'FINAL',
-          totalPriceLabel: 'Total',
           totalPrice: amount.toString(),
           currencyCode: 'INR',
           countryCode: 'IN'
-        }
+        },
+        callbackIntents: ['PAYMENT_AUTHORIZATION']
       };
 
-      const paymentData = await client.loadPaymentData(paymentDataRequest);
-      console.log('Payment data:', paymentData);
+      const paymentData = await paymentsClient.loadPaymentData(paymentDataRequest);
+      
+      // Validate payment data
+      if (!paymentData?.paymentMethodData?.tokenizationData?.token) {
+        throw new Error('Invalid payment data received');
+      }
 
-      // Generate a payment ID
-      const paymentId = `GP_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-      // Track analytics
-      console.log('Payment Analytics:', {
-        amount,
-        timestamp: new Date().toISOString(),
-        paymentMethod: 'Google Pay',
-        status: 'success',
-        transactionId: paymentData?.transactionId || paymentId,
-        currency: 'INR',
-        merchantName: 'Bhoj Basket'
+      // Process payment with backend
+      const response = await fetch('/api/payments/process', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify({
+          paymentMethodData: paymentData.paymentMethodData,
+          amount,
+          userId: user.id,
+          userEmail: profile.email
+        })
       });
 
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Payment processing failed');
+      }
+
+      const result = await response.json();
+      onSuccess?.(result.paymentId);
+      
       toast({
-        title: "Payment Successful",
-        description: "Your order has been placed successfully!",
+        title: 'Payment Successful',
+        description: 'Your order has been placed successfully',
+        status: 'success',
+        duration: 5000,
+        isClosable: true
       });
-
-      // Pass the payment ID to the onSuccess callback
-      onSuccess(paymentId);
     } catch (error) {
       console.error('Payment error:', error);
-      setError('Payment processing failed');
+      onError?.(error instanceof Error ? error.message : 'Payment failed');
+      
       toast({
-        title: "Payment Failed",
-        description: "There was an error processing your payment. Please try again or choose a different payment method.",
-        variant: "destructive"
+        title: 'Payment Failed',
+        description: error instanceof Error ? error.message : 'Please try again',
+        status: 'error',
+        duration: 5000,
+        isClosable: true
       });
-      onError();
     } finally {
       setIsProcessing(false);
     }
@@ -174,7 +180,7 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({
           <p className="text-gray-600">Complete your payment using Google Pay</p>
         </div>
         <div className="flex flex-col items-center space-y-4">
-          {isGooglePayReady ? (
+          {isReady ? (
             <button
               onClick={handlePayment}
               disabled={isProcessing}
@@ -195,9 +201,6 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({
             </button>
           ) : (
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bhoj-primary"></div>
-          )}
-          {error && (
-            <p className="text-sm text-red-500">{error}</p>
           )}
           <p className="text-sm text-gray-500">Demo Mode</p>
         </div>
