@@ -161,8 +161,12 @@ const Checkout = () => {
       setError(null);
 
       // Validate required data
-      if (!user || !profile) {
-        throw new Error('User data is missing');
+      if (!user) {
+        throw new Error('User data is missing. Please log in again.');
+      }
+      
+      if (!profile) {
+        throw new Error('User profile is missing. Please log in again.');
       }
 
       if (!items.length) {
@@ -630,7 +634,7 @@ const Checkout = () => {
       </div>
 
       {/* Google Pay Payment Modal */}
-      {showPayment && form.watch('paymentMethod') === 'upi' && (
+      {showPayment && form.watch('paymentMethod') === 'upi' && user && profile && (
         <GooglePayPayment
           amount={total}
           onSuccess={handlePaymentSuccess}

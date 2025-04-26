@@ -3,7 +3,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface GooglePayPaymentProps {
   amount: number;
-  onSuccess: () => void;
+  onSuccess: (paymentId: string) => void;
   onError: () => void;
   userData?: {
     name: string;
@@ -131,13 +131,16 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({
       const paymentData = await client.loadPaymentData(paymentDataRequest);
       console.log('Payment data:', paymentData);
 
+      // Generate a payment ID
+      const paymentId = `GP_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
       // Track analytics
       console.log('Payment Analytics:', {
         amount,
         timestamp: new Date().toISOString(),
         paymentMethod: 'Google Pay',
         status: 'success',
-        transactionId: paymentData?.transactionId || `TXN_${Math.random().toString(36).substr(2, 9)}`,
+        transactionId: paymentData?.transactionId || paymentId,
         currency: 'INR',
         merchantName: 'Bhoj Basket'
       });
@@ -147,7 +150,8 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({
         description: "Your order has been placed successfully!",
       });
 
-      onSuccess();
+      // Pass the payment ID to the onSuccess callback
+      onSuccess(paymentId);
     } catch (error) {
       console.error('Payment error:', error);
       setError('Payment processing failed');
