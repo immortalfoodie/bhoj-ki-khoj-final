@@ -110,7 +110,7 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <p className="text-gray-600 mb-4">Manage restaurant menus and items</p>
-            <Link to="/admin/menus">
+            <Link to="/admin/menu">
               <Button className="w-full bg-bhoj-primary hover:bg-bhoj-dark">
                 Manage Menus
               </Button>

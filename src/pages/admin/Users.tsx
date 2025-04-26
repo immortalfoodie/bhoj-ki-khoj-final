@@ -7,17 +7,18 @@ import classNames from 'classnames'; // install if needed: npm install classname
 const UsersPage = () => {
   // Mock extended user data
   const users = [
-    { id: 'U001', name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active', joinDate: '2024-01-15' },
-    { id: 'U002', name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'Pending', joinDate: '2024-03-22' },
-    { id: 'U003', name: 'Bob Johnson', email: 'bob@example.com', role: 'User', status: 'Active', joinDate: '2024-05-05' },
-    { id: 'U004', name: 'Alice Williams', email: 'alice@example.com', role: 'Restaurant', status: 'Inactive', joinDate: '2024-02-10' },
-    { id: 'U005', name: 'Michael Brown', email: 'michael@example.com', role: 'Dabbawala', status: 'Active', joinDate: '2023-12-01' },
-    { id: 'U006', name: 'Sarah Davis', email: 'sarah@example.com', role: 'User', status: 'Pending', joinDate: '2024-04-12' },
-    { id: 'U007', name: 'David Wilson', email: 'david@example.com', role: 'Admin', status: 'Active', joinDate: '2024-01-05' },
-    { id: 'U008', name: 'Emma Miller', email: 'emma@example.com', role: 'Restaurant', status: 'Inactive', joinDate: '2024-03-30' },
-    { id: 'U009', name: 'James Taylor', email: 'james@example.com', role: 'Dabbawala', status: 'Active', joinDate: '2023-11-18' },
-    { id: 'U010', name: 'Olivia Anderson', email: 'olivia@example.com', role: 'User', status: 'Active', joinDate: '2024-02-25' },
+    { id: 'U001', name: 'Vishal Gowda', email: 'gowddavishal05@gmail.com', role: 'Admin', status: 'Active', joinDate: '2024-01-15' },
+    { id: 'U002', name: 'Yash Naik', email: 'yashnaik@gmail.com', role: 'User', status: 'Pending', joinDate: '2024-03-22' },
+    { id: 'U003', name: 'Gideon Mire', email: 'gideonmire@gmail.com', role: 'User', status: 'Active', joinDate: '2024-05-05' },
+    { id: 'U004', name: 'Deepu Kumar', email: 'deepukumar@gmail.com', role: 'Restaurant', status: 'Inactive', joinDate: '2024-02-10' },
+    { id: 'U005', name: 'Rohan Deshmukh', email: 'rohan.deshmukh@example.in', role: 'Dabbawala', status: 'Active', joinDate: '2023-12-01' },
+    { id: 'U006', name: 'Kavya Nair', email: 'kavya.nair@example.in', role: 'User', status: 'Pending', joinDate: '2024-04-12' },
+    { id: 'U007', name: 'Arjun Iyer', email: 'arjun.iyer@example.in', role: 'Admin', status: 'Active', joinDate: '2024-01-05' },
+    { id: 'U008', name: 'Pooja Reddy', email: 'pooja.reddy@example.in', role: 'Restaurant', status: 'Inactive', joinDate: '2024-03-30' },
+    { id: 'U009', name: 'Siddharth Rao', email: 'siddharth.rao@example.in', role: 'Dabbawala', status: 'Active', joinDate: '2023-11-18' },
+    { id: 'U010', name: 'Ananya Gupta', email: 'ananya.gupta@example.in', role: 'User', status: 'Active', joinDate: '2024-02-25' },
   ];
+  
 
   // Badge color classes
   const roleBadgeColor = {
