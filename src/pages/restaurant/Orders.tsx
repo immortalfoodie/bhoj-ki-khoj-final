@@ -26,10 +26,10 @@ const RestaurantOrders = () => {
     // Sample data - replace with actual API call
     {
       id: "ORD001",
-      customerName: "John Doe",
+      customerName: "Vishal Gowda",
       items: [
-        { name: "Butter Chicken", quantity: 2, price: 250 },
-        { name: "Naan", quantity: 4, price: 30 },
+        { name: "Gujurati Thali ", quantity: 2, price: 250 },
+        { name: "Chappati", quantity: 4, price: 30 },
       ],
       total: 620,
       status: "pending",

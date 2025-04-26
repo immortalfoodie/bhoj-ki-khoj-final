@@ -17,7 +17,7 @@ const sampleOrders = [
     },
     {
       id: 'ORD003',
-      customer: 'Rohan Mehra',
+      customer: 'Vishal Gowda',
       status: 'In Progress',
       date: '2024-06-03',
       total: '115.75',
