@@ -1,0 +1,107 @@
+.checkoutContainer {
+  @apply container mx-auto px-4 py-6 h-screen;
+}
+
+.backLink {
+  @apply inline-flex items-center text-bhoj-primary mb-4;
+}
+
+.title {
+  @apply text-2xl font-bold mb-6;
+}
+
+.gridContainer {
+  @apply grid gap-6 md:grid-cols-3;
+}
+
+.mainContent {
+  @apply md:col-span-2 space-y-6;
+}
+
+.sidebar {
+  @apply md:col-span-1;
+}
+
+.orderCard {
+  @apply sticky top-6;
+}
+
+.cartItem {
+  @apply flex justify-between items-center;
+}
+
+.quantityControls {
+  @apply flex items-center;
+}
+
+.quantityButton {
+  @apply h-8 w-8 rounded-full p-0;
+}
+
+.quantityValue {
+  @apply mx-2 text-center inline-block w-4;
+}
+
+.itemDetails {
+  @apply flex items-center;
+}
+
+.itemName {
+  @apply font-medium;
+}
+
+.itemPrice {
+  @apply text-sm text-gray-500;
+}
+
+.deliveryOption {
+  @apply flex items-center space-x-3 space-y-0;
+}
+
+.deliveryIcon {
+  @apply bg-bhoj-light p-2 rounded-full mr-2;
+}
+
+.deliveryLabel {
+  @apply font-normal flex items-center cursor-pointer;
+}
+
+.deliveryName {
+  @apply font-medium;
+}
+
+.deliveryDescription {
+  @apply text-sm text-gray-500;
+}
+
+.mapContainer {
+  @apply rounded-lg overflow-hidden border border-gray-200;
+}
+
+.paymentOption {
+  @apply flex items-center space-x-3 space-y-0;
+}
+
+.paymentIcon {
+  @apply bg-gray-100 p-2 rounded-full mr-2;
+}
+
+.paymentLabel {
+  @apply font-normal flex items-center cursor-pointer;
+}
+
+.summaryItem {
+  @apply flex justify-between;
+}
+
+.summaryLabel {
+  @apply text-gray-600;
+}
+
+.summaryTotal {
+  @apply flex justify-between font-bold;
+}
+
+.placeOrderButton {
+  @apply w-full bg-bhoj-primary hover:bg-bhoj-dark;
+} 

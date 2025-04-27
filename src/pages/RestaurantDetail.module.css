@@ -1,0 +1,253 @@
+.container {
+  @apply pb-20;
+}
+
+.bannerContainer {
+  @apply relative h-48 lg:h-64 overflow-hidden;
+}
+
+.bannerImage {
+  @apply w-full h-full object-cover;
+}
+
+.bannerOverlay {
+  @apply absolute inset-0 bg-gradient-to-t from-black/60 to-transparent;
+}
+
+.backButton {
+  @apply absolute top-4 left-4 bg-white rounded-full p-2 shadow-md;
+}
+
+.bannerContent {
+  @apply absolute bottom-4 left-4 right-4 text-white;
+}
+
+.restaurantName {
+  @apply text-2xl font-bold;
+}
+
+.restaurantInfo {
+  @apply flex items-center mt-1 space-x-4 text-sm;
+}
+
+.ratingContainer {
+  @apply flex items-center;
+}
+
+.ratingIcon {
+  @apply h-4 w-4 text-bhoj-secondary fill-bhoj-secondary mr-1;
+}
+
+.ratingCount {
+  @apply text-gray-200 ml-1;
+}
+
+.infoContainer {
+  @apply flex items-center;
+}
+
+.infoIcon {
+  @apply h-4 w-4 mr-1;
+}
+
+.mapContainer {
+  @apply container mx-auto px-4 py-4;
+}
+
+.mapWrapper {
+  @apply rounded-lg overflow-hidden shadow-sm border border-gray-100;
+}
+
+.mapLoading {
+  @apply w-full h-[300px] bg-gray-100 flex items-center justify-center;
+}
+
+.mapError {
+  @apply w-full h-[300px] bg-gray-100 flex items-center justify-center text-red-500;
+}
+
+.restaurantInfoContainer {
+  @apply container mx-auto px-4 py-4;
+}
+
+.infoHeader {
+  @apply flex flex-wrap justify-between items-center;
+}
+
+.cuisineBadges {
+  @apply flex flex-wrap gap-2 mb-2;
+}
+
+.vegBadge {
+  @apply bg-green-500 text-white rounded-full;
+}
+
+.address {
+  @apply text-sm text-gray-600;
+}
+
+.phone {
+  @apply text-sm text-gray-600 flex items-center gap-1;
+}
+
+.costInfo {
+  @apply text-sm text-gray-600;
+}
+
+.actionButtons {
+  @apply flex space-x-2 mt-2 sm:mt-0;
+}
+
+.actionButton {
+  @apply flex items-center gap-1;
+}
+
+.description {
+  @apply border-t border-b py-4 my-4 text-sm text-gray-600;
+}
+
+.menuContainer {
+  @apply mt-8 px-4 md:px-6 max-w-4xl mx-auto;
+}
+
+.menuHeader {
+  @apply flex items-center justify-between mb-6;
+}
+
+.menuTitle {
+  @apply text-2xl font-semibold;
+}
+
+.filterContainer {
+  @apply flex items-center gap-4;
+}
+
+.vegFilter {
+  @apply flex items-center gap-2;
+}
+
+.searchContainer {
+  @apply relative mb-8;
+  z-index: 30;
+}
+
+.searchInput {
+  @apply pl-10 w-full bg-white shadow-sm;
+  height: 40px;
+}
+
+.searchIcon {
+  @apply absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none;
+  z-index: 31;
+}
+
+.menuSection {
+  @apply space-y-8;
+}
+
+.categoryHeader {
+  @apply text-lg font-semibold mb-4 sticky top-0 bg-white py-2;
+  z-index: 20;
+}
+
+.menuGrid {
+  @apply grid gap-4;
+}
+
+.menuCardContent {
+  @apply p-4;
+}
+
+.menuItemHeader {
+  @apply flex justify-between items-start gap-4;
+}
+
+.menuItemInfo {
+  @apply flex-1;
+}
+
+.menuItemTitle {
+  @apply flex items-center gap-2 mb-1;
+}
+
+.menuItemTitle h4 {
+  @apply font-medium text-gray-900;
+}
+
+.menuItemDescription {
+  @apply text-sm text-gray-600 line-clamp-2;
+}
+
+.menuItemBadges {
+  @apply flex flex-wrap gap-2 mt-2;
+}
+
+.priceContainer {
+  @apply flex flex-col items-end gap-2;
+}
+
+.price {
+  @apply font-medium text-gray-900;
+}
+
+.addButton {
+  @apply flex items-center gap-1;
+}
+
+/* Tab styles */
+.tabsList {
+  @apply bg-gray-100 p-1 mb-6 relative;
+  z-index: 25;
+}
+
+.tabTrigger {
+  @apply data-[state=active]:bg-bhoj-primary data-[state=active]:text-white;
+}
+
+.categoryTabs {
+  @apply bg-gray-100 p-1 mb-6;
+}
+
+.menuItems {
+  @apply space-y-6;
+}
+
+.categoryTitle {
+  @apply text-lg font-semibold mb-3;
+}
+
+.menuCard {
+  @apply overflow-hidden;
+}
+
+.spiceBadge {
+  @apply text-xs;
+}
+
+.portionBadge {
+  @apply text-xs;
+}
+
+.vegBadge {
+  @apply bg-green-500 text-white text-xs;
+}
+
+.nonVegBadge {
+  @apply bg-red-500 text-white text-xs;
+}
+
+.specialIngredients {
+  @apply text-xs text-gray-500 mt-2;
+}
+
+.cartButton {
+  @apply fixed bottom-0 left-0 right-0 bg-white border-t p-4;
+}
+
+.cartButtonContainer {
+  @apply container mx-auto max-w-5xl;
+}
+
+.cartButtonContent {
+  @apply w-full;
+} 

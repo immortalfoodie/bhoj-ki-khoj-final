@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bhoj-ki-Khoj | Homemade Food Delivery</title>
+    <meta name="description" content="Connect with homemade food providers and tiffin services, delivered by Mumbai's Dabbawalas." />
+    <meta name="author" content="Bhoj-ki-Khoj" />
+
+    <meta property="og:title" content="Bhoj-ki-Khoj | Homemade Food Delivery" />
+    <meta property="og:description" content="Connect with homemade food providers and tiffin services, delivered by Mumbai's Dabbawalas." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@bhojkikhoj" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    
+    <!-- Google Pay -->
+    <script async src="https://pay.google.com/gp/p/js/pay.js"></script>
+    <script>
+      window.addEventListener('load', function() {
+        if (window.google && window.google.payments) {
+          console.log('Google Pay API loaded successfully');
+        } else {
+          console.error('Failed to load Google Pay API');
+        }
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

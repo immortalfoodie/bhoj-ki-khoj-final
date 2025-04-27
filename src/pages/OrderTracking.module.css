@@ -1,0 +1,143 @@
+.orderTrackingContainer {
+  @apply mx-auto px-4 py-6;
+}
+
+.backLink {
+  @apply inline-flex items-center text-bhoj-primary mb-4;
+}
+
+.title {
+  @apply text-2xl font-bold mb-6;
+}
+
+.gridContainer {
+  @apply grid gap-6 md:grid-cols-3;
+}
+
+.sidebar {
+  @apply md:col-span-1 space-y-6;
+}
+
+.mainContent {
+  @apply md:col-span-2;
+}
+
+.orderCard {
+  @apply sticky top-6;
+}
+
+.orderInfo {
+  @apply mb-4;
+}
+
+.orderHeader {
+  @apply flex justify-between items-center mb-2;
+}
+
+.orderLabel {
+  @apply text-sm text-gray-500;
+}
+
+.orderValue {
+  @apply font-medium;
+}
+
+.deliveryInfo {
+  @apply flex items-center mt-4;
+}
+
+.deliveryIcon {
+  @apply h-5 w-5 text-bhoj-primary mr-2;
+}
+
+.dabbawalaCard {
+  @apply flex items-center;
+}
+
+.dabbawalaImage {
+  @apply w-16 h-16 rounded-full object-cover mr-4;
+}
+
+.dabbawalaInfo {
+  @apply flex flex-col;
+}
+
+.dabbawalaName {
+  @apply font-medium;
+}
+
+.dabbawalaDetails {
+  @apply flex items-center text-sm text-gray-500 mt-1;
+}
+
+.ratingIcon {
+  @apply h-4 w-4 text-bhoj-secondary fill-bhoj-secondary mr-1;
+}
+
+.actionButtons {
+  @apply flex mt-4 space-x-2;
+}
+
+.actionButton {
+  @apply flex-1 flex items-center justify-center;
+}
+
+.mapCard {
+  @apply p-0;
+}
+
+.orderDetails {
+  @apply space-y-4;
+}
+
+.restaurantName {
+  @apply font-medium mb-2;
+}
+
+.itemList {
+  @apply space-y-3;
+}
+
+.itemRow {
+  @apply flex justify-between;
+}
+
+.itemQuantity {
+  @apply font-medium;
+}
+
+.priceRow {
+  @apply flex justify-between;
+}
+
+.priceLabel {
+  @apply text-gray-600;
+}
+
+.totalRow {
+  @apply flex justify-between font-bold mt-2;
+}
+
+.deliveryInfo {
+  @apply space-y-2;
+}
+
+.deliveryLabel {
+  @apply text-sm text-gray-500;
+}
+
+.deliveryValue {
+  @apply mt-1;
+}
+
+.footerButtons {
+  @apply flex flex-col space-y-2;
+}
+
+.helpButton {
+  @apply w-full;
+}
+
+.orderMoreButton {
+  @apply w-full;
+} 

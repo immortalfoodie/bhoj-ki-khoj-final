@@ -1,0 +1,56 @@
+.modalOverlay {
+  @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50;
+}
+
+.modalContent {
+  @apply bg-white rounded-lg p-6 max-w-md w-full mx-4;
+}
+
+.modalHeader {
+  @apply text-center mb-6;
+}
+
+.modalTitle {
+  @apply text-2xl font-bold mb-2;
+}
+
+.modalDescription {
+  @apply text-gray-600;
+}
+
+.userInfo {
+  @apply text-sm text-gray-500 mt-2;
+}
+
+.cartSummary {
+  @apply mt-4 p-3 bg-gray-50 rounded-lg;
+}
+
+.cartItems {
+  @apply text-sm text-gray-600;
+}
+
+.buttonContainer {
+  @apply flex flex-col items-center space-y-4;
+}
+
+.payButton {
+  @apply flex items-center justify-center w-full max-w-xs px-6 py-3 bg-black text-white rounded-lg 
+         hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.googlePayLogo {
+  @apply h-6 mr-2;
+}
+
+.loadingSpinner {
+  @apply animate-spin rounded-full h-6 w-6 border-b-2 border-white;
+}
+
+.initializingSpinner {
+  @apply animate-spin rounded-full h-12 w-12 border-b-2 border-bhoj-primary;
+}
+
+.testEnvironment {
+  @apply text-sm text-gray-500;
+} 
