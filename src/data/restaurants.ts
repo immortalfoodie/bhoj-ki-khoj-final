@@ -43,8 +43,8 @@ export const restaurantsData: { [key: string]: Restaurant } = {
   "1": {
     id: "1",
     name: "Maharaja Thali House",
-    image: "https://images.unsplash.com/photo-1680993032090-1ef7ea9b51e5?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    bannerImage: "https://images.unsplash.com/photo-1680993032090-1ef7ea9b51e5?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    image: "https://images.jdmagicbox.com/v2/comp/mumbai/s7/022pxx22.xx22.191021210807.v9s7/catalogue/maharaja-thali-bandra-west-mumbai-inexpensive-restaurants-below-rs-500--1ofbcs2ubt.jpg",
+    bannerImage: "https://images.jdmagicbox.com/v2/comp/mumbai/s7/022pxx22.xx22.191021210807.v9s7/catalogue/maharaja-thali-bandra-west-mumbai-inexpensive-restaurants-below-rs-500--1ofbcs2ubt.jpg",    
     rating: 4.5,
     ratingCount: 245,
     deliveryTime: "30-40 min",
