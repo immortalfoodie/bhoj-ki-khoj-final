@@ -75,7 +75,13 @@
 }
 
 .mapContainer {
-  @apply rounded-lg overflow-hidden border border-gray-200;
+  width: 100%;
+  height: 300px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  position: relative;
+  z-index: 0;
 }
 
 .paymentOption {
@@ -104,4 +110,22 @@
 
 .placeOrderButton {
   @apply w-full bg-bhoj-primary hover:bg-bhoj-dark;
+}
+
+.paymentModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.mapWrapper {
+  position: relative;
+  z-index: 0;
 } 

@@ -97,6 +97,7 @@ const RestaurantDetail = () => {
         navigate('/login', { state: { from: `/restaurant/${id}` } });
         return;
       }
+      console.log(item,'adding to cart eher');
 
       await addToCart({
         id: item.id,
@@ -162,7 +163,7 @@ const RestaurantDetail = () => {
           className={styles.bannerImage}
           onError={handleImageError}
         />
-        <div className={styles.bannerOverlay}></div>
+        <div className ={styles.bannerOverlay}></div>
         <Link 
           to="/" 
           className={styles.backButton}
@@ -393,7 +394,7 @@ const RestaurantDetail = () => {
         </Tabs>
       </div>
       
-      {/* Cart Button */}
+      Cart Button
       {cartCount > 0 && (
         <div className={styles.cartButton}>
           <Button 

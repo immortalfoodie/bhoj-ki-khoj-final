@@ -23,7 +23,7 @@ const mockRestaurants: Restaurant[] = [
     cuisine: "North Indian",
     location: "Andheri West",
     rating: 4.5,
-    imageUrl: "/placeholder.svg",
+    imageUrl: "https://content3.jdmagicbox.com/comp/def_content_category/moms-kitchen/gallery-3-moms-kitchen-19-f0hcg.jpg",
     description: "Homely North Indian dishes made with love and tradition."
   },
   {
@@ -32,7 +32,7 @@ const mockRestaurants: Restaurant[] = [
     cuisine: "Gujarati",
     location: "Borivali",
     rating: 4.2,
-    imageUrl: "/placeholder.svg",
+    imageUrl: "https://dynamic.tourtravelworld.com/blog_images/14-gujarati-dishes-that-you-must-try-when-you-visit-gujarat-20170927121204.jpg",
     description: "Authentic Gujarati thalis delivered fresh daily."
   },
   {
@@ -41,7 +41,7 @@ const mockRestaurants: Restaurant[] = [
     cuisine: "Punjabi",
     location: "Bandra",
     rating: 4.7,
-    imageUrl: "/placeholder.svg",
+    imageUrl: "https://content.jdmagicbox.com/v2/comp/mumbai/l5/022pxx22.xx22.200127191824.b5l5/catalogue/real-punjabi-dhaba-mumbai-restaurants-1zki5s09cy.jpg",
     description: "Rich and flavorful Punjabi cuisine with a homemade touch."
   },
   {
@@ -50,7 +50,7 @@ const mockRestaurants: Restaurant[] = [
     cuisine: "South Indian",
     location: "Chembur",
     rating: 4.3,
-    imageUrl: "/placeholder.svg",
+    imageUrl: "https://sukhis.com/app/uploads/2022/04/image3-4.jpg",
     description: "Traditional South Indian dishes prepared with authentic spices."
   }
 ];
