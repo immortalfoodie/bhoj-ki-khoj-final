@@ -1,27 +1,37 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Package, Clock, Navigation, Bike, DollarSign } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
 
 const DabbawalaDashboard = () => {
+  const { toast } = useToast();
+  const [activeDeliveries, setActiveDeliveries] = useState(3);
+  const [completedDeliveries, setCompletedDeliveries] = useState(7);
+  const [earnings, setEarnings] = useState(850);
+  const [deliveryStatuses, setDeliveryStatuses] = useState<{[key: string]: string}>({
+    "DEL-100": "ready_for_pickup",
+    "DEL-101": "in_transit",
+    "DEL-102": "assigned"
+  });
+
   // Mock data - in a real app, these would come from backend
   const stats = [
     { 
       title: "Active Deliveries", 
-      value: "3", 
-      icon: <Package className="h-4 w-4 text-muted-foreground" /> 
+      value: activeDeliveries.toString(), 
+      icon: <Package className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" /> 
     },
     { 
       title: "Completed Today", 
-      value: "7", 
-      icon: <Clock className="h-4 w-4 text-muted-foreground" /> 
+      value: completedDeliveries.toString(), 
+      icon: <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" /> 
     },
     { 
       title: "Today's Earnings", 
-      value: "₹850", 
-      icon: <DollarSign className="h-4 w-4 text-muted-foreground" /> 
+      value: `₹${earnings}`, 
+      icon: <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" /> 
     }
   ];
 
@@ -29,12 +39,12 @@ const DabbawalaDashboard = () => {
   const deliveryRequests = [
     {
       id: "DEL-100",
-      customer: "Rahul Sharma",
+      customer: "Vishal Gowda",
       restaurant: "Punjabi Dhaba",
-      pickupAddress: "Sector 14, Gurugram",
-      deliveryAddress: "Sector 45, Gurugram",
+      pickupAddress: "Prabhadevi, Mumbai",
+      deliveryAddress: "Goregoan East, Mumbai",
       items: 3,
-      status: "ready_for_pickup",
+      status: deliveryStatuses["DEL-100"],
       distance: "4.2 km",
       time: "15 mins ago"
     },
@@ -45,7 +55,7 @@ const DabbawalaDashboard = () => {
       pickupAddress: "Andheri East, Mumbai",
       deliveryAddress: "BKC, Mumbai",
       items: 2,
-      status: "in_transit",
+      status: deliveryStatuses["DEL-101"],
       distance: "5.8 km",
       time: "32 mins ago"
     },
@@ -56,126 +66,134 @@ const DabbawalaDashboard = () => {
       pickupAddress: "Rohini, Delhi",
       deliveryAddress: "Pitampura, Delhi",
       items: 1,
-      status: "assigned",
+      status: deliveryStatuses["DEL-102"],
       distance: "3.5 km",
       time: "Just now"
     }
   ];
 
-  // Helper function to get status badge
-  const getStatusBadge = (status: string) => {
-    switch(status) {
-      case 'assigned':
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Assigned</Badge>;
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
       case 'ready_for_pickup':
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Ready for Pickup</Badge>;
+        return 'bg-yellow-100 text-yellow-800';
       case 'in_transit':
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">In Transit</Badge>;
-      case 'delivered':
-        return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Delivered</Badge>;
+        return 'bg-blue-100 text-blue-800';
+      case 'assigned':
+        return 'bg-green-100 text-green-800';
+      case 'completed':
+        return 'bg-purple-100 text-purple-800';
       default:
-        return <Badge>Unknown</Badge>;
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  // Helper function to get action button based on status
-  const getActionButton = (status: string, id: string) => {
-    switch(status) {
-      case 'assigned':
-        return (
-          <Button size="sm" className="bg-bhoj-primary hover:bg-bhoj-dark">
-            Accept
-          </Button>
-        );
-      case 'ready_for_pickup':
-        return (
-          <Button size="sm" className="bg-bhoj-primary hover:bg-bhoj-dark">
-            Picked Up
-          </Button>
-        );
-      case 'in_transit':
-        return (
-          <Button size="sm" className="bg-bhoj-primary hover:bg-bhoj-dark">
-            Delivered
-          </Button>
-        );
-      default:
-        return null;
-    }
+  const getStatusText = (status: string) => {
+    return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
+  const handleStartDelivery = (requestId: string) => {
+    setDeliveryStatuses(prev => ({
+      ...prev,
+      [requestId]: "in_transit"
+    }));
+    toast({
+      title: "Delivery Started",
+      description: `You've started the delivery for order ${requestId}`,
+    });
+  };
+
+  const handleNavigate = (requestId: string, address: string) => {
+    // In a real app, this would integrate with a maps API
+    toast({
+      title: "Navigation Started",
+      description: `Navigating to: ${address}`,
+    });
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Dabbawala Dashboard</h1>
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6 max-w-[100vw] overflow-x-hidden">
+      <h1 className="text-xl sm:text-2xl font-bold">Dabbawala Dashboard</h1>
       
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
         {stats.map((stat, index) => (
-          <Card key={index} className="border-l-4 border-bhoj-primary">
+          <Card key={index} className="border-l-4 border-bhoj-primary min-w-0 hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-              {stat.icon}
+              <CardTitle className="text-xs sm:text-sm font-medium truncate pr-2">{stat.title}</CardTitle>
+              <div className="flex-shrink-0">
+                {stat.icon}
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
+              <div className="text-lg sm:text-2xl font-bold truncate">{stat.value}</div>
             </CardContent>
           </Card>
         ))}
       </div>
       
       <div className="space-y-4">
-        <h2 className="text-xl font-medium">Active Delivery Requests</h2>
+        <h2 className="text-lg sm:text-xl font-medium">Active Delivery Requests</h2>
         
-        <div className="space-y-4">
-          {deliveryRequests.map((delivery) => (
-            <Card key={delivery.id} className="overflow-hidden">
-              <div className="flex flex-col md:flex-row">
-                <div className="p-6 flex-1">
-                  <div className="flex justify-between items-center mb-4">
-                    <div>
-                      <h3 className="text-lg font-medium">{delivery.restaurant}</h3>
-                      <p className="text-sm text-gray-500">Order #{delivery.id}</p>
+        <div className="space-y-3 sm:space-y-4">
+          {deliveryRequests.map((request) => (
+            <Card key={request.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex items-start justify-between sm:justify-start gap-2">
+                      <span className="text-sm sm:text-base font-medium truncate">{request.id}</span>
+                      <Badge className={`${getStatusBadgeColor(request.status)} transition-colors duration-200`}>
+                        {getStatusText(request.status)}
+                      </Badge>
                     </div>
-                    {getStatusBadge(delivery.status)}
+                    
+                    <div className="space-y-1">
+                      <p className="text-xs sm:text-sm text-gray-600 truncate">
+                        <span className="font-medium">Customer:</span> {request.customer}
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600 truncate">
+                        <span className="font-medium">Restaurant:</span> {request.restaurant}
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-1 sm:gap-4">
+                        <p className="text-xs sm:text-sm text-gray-600 truncate flex-1">
+                          <span className="font-medium">Pickup:</span> {request.pickupAddress}
+                        </p>
+                        <p className="text-xs sm:text-sm text-gray-600 truncate flex-1">
+                          <span className="font-medium">Delivery:</span> {request.deliveryAddress}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                      <span>{request.items} items</span>
+                      <span>•</span>
+                      <span>{request.distance}</span>
+                      <span>•</span>
+                      <span>{request.time}</span>
+                    </div>
                   </div>
                   
-                  <div className="space-y-3">
-                    <div className="flex items-start">
-                      <Bike className="h-5 w-5 text-bhoj-primary mr-2 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium">Pickup</p>
-                        <p className="text-sm text-gray-500">{delivery.pickupAddress}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start">
-                      <Navigation className="h-5 w-5 text-bhoj-primary mr-2 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium">Delivery</p>
-                        <p className="text-sm text-gray-500">{delivery.deliveryAddress}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start">
-                      <Package className="h-5 w-5 text-bhoj-primary mr-2 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium">Order Details</p>
-                        <p className="text-sm text-gray-500">{delivery.items} items • {delivery.distance}</p>
-                      </div>
-                    </div>
+                  <div className="flex sm:flex-col gap-2 sm:gap-3">
+                    <Button 
+                      size="sm" 
+                      className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 bg-bhoj-primary hover:bg-bhoj-dark transition-colors duration-200 active:scale-95 transform"
+                      onClick={() => handleNavigate(request.id, request.status === "ready_for_pickup" ? request.pickupAddress : request.deliveryAddress)}
+                    >
+                      <Navigation className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                      Navigate
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="flex-1 sm:flex-none text-xs sm:text-sm h-8 sm:h-9 hover:bg-bhoj-primary hover:text-white transition-all duration-200 active:scale-95 transform"
+                      onClick={() => handleStartDelivery(request.id)}
+                      disabled={request.status === "in_transit"}
+                    >
+                      <Bike className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                      {request.status === "in_transit" ? "In Progress" : "Start"}
+                    </Button>
                   </div>
                 </div>
-                
-                <div className="bg-gray-50 p-6 flex flex-col justify-between md:w-48">
-                  <div>
-                    <p className="text-sm font-medium">Customer</p>
-                    <p className="text-sm text-gray-500">{delivery.customer}</p>
-                    <p className="text-xs text-gray-400 mt-1">{delivery.time}</p>
-                  </div>
-                  <div className="mt-4">
-                    {getActionButton(delivery.status, delivery.id)}
-                  </div>
-                </div>
-              </div>
+              </CardContent>
             </Card>
           ))}
         </div>

@@ -1,6 +1,19 @@
-
 import React from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import { MapPin } from 'lucide-react';
+import L from 'leaflet';
+
+// Fix for default marker icons in Leaflet with Next.js
+const icon = L.icon({
+  iconUrl: '/marker-icon.png',
+  iconRetinaUrl: '/marker-icon-2x.png',
+  shadowUrl: '/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
 
 type CoverageArea = {
   id: number;
@@ -16,39 +29,47 @@ interface CoverageMapProps {
 }
 
 const CoverageMap = ({ areas = [] }: CoverageMapProps) => {
+  // Default center to Mumbai
+  const defaultCenter: [number, number] = [19.0760, 72.8777];
+  const defaultZoom = 11;
+
   return (
-    <div className="h-full w-full rounded-lg bg-gray-100 relative p-4">
-      <div className="text-center text-green-800 font-medium mb-4">
-        Google Maps API integration would display coverage areas here
-      </div>
-      
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-        {areas.map(area => (
-          <div key={area.id} className="bg-white p-3 rounded-md shadow-sm border border-green-100">
-            <div className="flex items-center">
-              <MapPin className="h-4 w-4 text-green-700 mr-2" />
-              <span className="font-medium">{area.name}</span>
-            </div>
-            <div className="mt-2 flex justify-between">
-              <div className="text-xs">
-                <div>Restaurants: {area.restaurants}</div>
-                <div>Dabbawalas: {area.dabbawalas}</div>
+    <div className="h-[300px] sm:h-[400px] md:h-[500px] w-full rounded-lg overflow-hidden border border-gray-200">
+      <MapContainer 
+        center={defaultCenter} 
+        zoom={defaultZoom} 
+        style={{ height: '100%', width: '100%' }}
+        zoomControl={false} // Disable default zoom control
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {areas.map((area) => (
+          <Marker 
+            key={area.id} 
+            position={area.coordinates}
+            icon={icon}
+          >
+            <Popup className="text-xs sm:text-sm">
+              <div className="p-1 sm:p-2">
+                <h3 className="font-medium text-green-800 text-sm sm:text-base">{area.name}</h3>
+                <div className="mt-1 sm:mt-2 space-y-0.5">
+                  <p>Restaurants: {area.restaurants}</p>
+                  <p>Dabbawalas: {area.dabbawalas}</p>
+                  <p className={`mt-1 px-2 py-0.5 rounded inline-block text-xs ${
+                    area.coverage === 'High' ? 'bg-green-100 text-green-800' :
+                    area.coverage === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {area.coverage} Coverage
+                  </p>
+                </div>
               </div>
-              <div className={`text-xs px-2 py-1 rounded ${
-                area.coverage === 'High' ? 'bg-green-100 text-green-800' :
-                area.coverage === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
-              }`}>
-                {area.coverage}
-              </div>
-            </div>
-          </div>
+            </Popup>
+          </Marker>
         ))}
-      </div>
-      
-      <div className="mt-4 text-sm text-gray-500 text-center">
-        To display the actual map, you'll need to integrate the Google Maps API
-      </div>
+      </MapContainer>
     </div>
   );
 };

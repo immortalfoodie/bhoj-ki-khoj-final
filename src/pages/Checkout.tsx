@@ -258,7 +258,7 @@ const Checkout = () => {
   
   const restaurantName = items[0]?.restaurantName || "Restaurant";
   const subtotal = getCartTotal();
-  const deliveryFee = 40;
+  const deliveryFee = form.watch('deliveryOption') === 'dabbawala' ? 40 : 0;
   const taxes = Math.round(subtotal * 0.05);
   const total = subtotal + deliveryFee + taxes;
   
@@ -747,7 +747,8 @@ const Checkout = () => {
         
         {/* Order Summary */}
         <div>
-          <Card className="sticky top-6">
+          <Card className="sticky top-6" className="pb-[6rem]">
+
             <CardHeader>
               <CardTitle>Order Summary</CardTitle>
             </CardHeader>

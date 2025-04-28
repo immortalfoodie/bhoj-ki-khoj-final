@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 // Add Google Pay API types
 declare global {
   interface Window {
+    chrome?: any;
     google?: {
       payments?: {
         api: {
@@ -22,9 +23,15 @@ interface GooglePayPaymentProps {
   amount: number;
   onSuccess: (paymentId: string) => void;
   onError: (error?: string) => void;
+  userData: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  paymentMethod: string;
 }
 
-const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({ amount, onSuccess, onError }) => {
+const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({ amount, onSuccess, onError, userData, paymentMethod }) => {
   const [isReady, setIsReady] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -31,16 +31,16 @@ const ViewCartButton = () => {
   return (
     <AnimatePresence>
       <motion.div 
-        className="fixed bottom-16 left-0 right-0 z-50 bg-gradient-to-b from-transparent to-white pb-[env(safe-area-inset-bottom)] md:pb-2"
+        className="fixed bottom-0 left-0 right-0 z-[100] bg-gradient-to-b from-transparent to-white pb-[env(safe-area-inset-bottom)] md:pb-2"
         initial="initial"
         animate="animate"
         exit="exit"
         variants={slideUp}
       >
-        <div className="px-4 py-1.5">
+        <div className="px-4 py-2">
           <motion.button 
             onClick={handleViewCart}
-            className="w-full bg-[#4CAF50] hover:bg-[#45a049] active:bg-[#3d8b40] text-white rounded-lg h-12 flex items-center justify-between px-4 transition-colors duration-200 shadow-md shadow-green-200/50"
+            className="w-full bg-[#4CAF50] hover:bg-[#45a049] active:bg-[#3d8b40] text-white rounded-lg h-14 flex items-center justify-between px-4 transition-colors duration-200 shadow-lg shadow-green-200/50"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             transition={bounceTransition}
@@ -57,7 +57,10 @@ const ViewCartButton = () => {
                   {totalItems}
                 </motion.span>
               </div>
-              <span className="text-base font-medium">View Cart</span>
+              <div className="flex flex-col items-start">
+                <span className="text-base font-medium">View Cart</span>
+                <span className="text-xs text-white/80">Place Order</span>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <motion.span 
@@ -68,8 +71,6 @@ const ViewCartButton = () => {
               >
                 ₹{total}
               </motion.span>
-              <span className="text-white/80 text-sm">•</span>
-              <span className="text-white/80 text-sm">Checkout</span>
             </div>
           </motion.button>
         </div>
