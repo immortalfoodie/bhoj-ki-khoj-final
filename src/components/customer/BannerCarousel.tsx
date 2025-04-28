@@ -12,19 +12,19 @@ interface Banner {
 const banners: Banner[] = [
   {
     id: 1,
-    image: "https://images.unsplash.com/photo-1600891964092-4316c288032e?auto=format&q=75&fit=crop&w=600",
+    image: "https://images.unsplash.com/photo-1680993032090-1ef7ea9b51e5?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     title: "Special Thali",
     description: "Get 20% off on your first order"
   },
   {
     id: 2,
-    image: "https://images.unsplash.com/photo-1567337710282-00832b415979?auto=format&q=75&fit=crop&w=600",
+    image: "https://c.ndtvimg.com/2023-07/rmjkg64_indian-food_625x300_25_July_23.jpg?im=FaceCrop,algorithm=dnn,width=1200,height=886",
     title: "Free Delivery",
     description: "On orders above ₹300"
   },
   {
     id: 3,
-    image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&q=75&fit=crop&w=600",
+    image: "https://blog.swiggy.com/wp-content/uploads/2024/11/Image-1_mumbai-vada-pav.png",
     title: "Trending Now",
     description: "Try Mumbai's best Vada Pav"
   }

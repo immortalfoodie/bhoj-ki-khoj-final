@@ -90,7 +90,7 @@ const Checkout = () => {
   const getUserLocation = () => {
     setIsFetchingLocation(true);
     if ("geolocation" in navigator) {
-      // First fetch - low accuracy
+      // First fetch
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
@@ -108,7 +108,7 @@ const Checkout = () => {
               setDeliveryCoordinates([latitude, longitude]);
             }
 
-            // Second fetch - high accuracy
+            // Second fetch (same high accuracy)
             navigator.geolocation.getCurrentPosition(
               async (position) => {
                 const { latitude, longitude } = position.coords;
@@ -142,6 +142,7 @@ const Checkout = () => {
                 }
               },
               (error) => {
+                console.error("Geolocation error:", error);
                 toast({
                   title: "Location Error",
                   description: "Please enable location access in your browser settings.",
@@ -166,6 +167,7 @@ const Checkout = () => {
           }
         },
         (error) => {
+          console.error("Geolocation error:", error);
           toast({
             title: "Location Error",
             description: "Please enable location access in your browser settings.",
@@ -174,8 +176,8 @@ const Checkout = () => {
           setIsFetchingLocation(false);
         },
         {
-          enableHighAccuracy: false,
-          timeout: 5000,
+          enableHighAccuracy: true,
+          timeout: 10000,
           maximumAge: 0
         }
       );
@@ -476,18 +478,25 @@ const Checkout = () => {
       // Handle different payment methods
       switch (data.paymentMethod) {
         case 'upi':
+          // Show Google Pay payment modal
           setShowPayment(true);
-          break;
+          setIsProcessing(false);
+          return;
         case 'card':
           // Simulate card payment
-          try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            const mockPaymentId = `CARD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            await handlePaymentSuccess(mockPaymentId);
-          } catch (error) {
-            handlePaymentError('Card payment failed. Please try again.');
-          }
-          break;
+          // try {
+          //   await new Promise(resolve => setTimeout(resolve, 2000));
+          //   const mockPaymentId = `CARD_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          //   await handlePaymentSuccess(mockPaymentId);
+          // } catch (error) {
+          //   handlePaymentError('Card payment failed. Please try again.');
+          // }
+          // break;
+
+          setShowPayment(true);
+          setIsProcessing(false);
+          return;
+
         case 'cod':
           // Handle cash on delivery
           try {
@@ -648,8 +657,8 @@ const Checkout = () => {
                       />
                       
                       {/* Map Component */}
-                      <div className="rounded-lg overflow-hidden border border-gray-200">
-                        <div className="overflow-hidden">
+                      <div className={styles.mapWrapper}>
+                        <div className={styles.mapContainer}>
                           <MapComponent
                             initialViewState={{
                               longitude: restaurantCoordinates.longitude,
@@ -775,18 +784,20 @@ const Checkout = () => {
       </div>
 
       {/* Google Pay Payment Modal */}
-      {showPayment && form.watch('paymentMethod') === 'upi' && user && profile && (
-        <GooglePayPayment
-          amount={total}
-          onSuccess={handlePaymentSuccess}
-          onError={handlePaymentError}
-          userData={{
-            name: profile.name,
-            email: profile.email,
-            phone: profile.phone
-          }}
-          paymentMethod={form.watch('paymentMethod')}
-        />
+      {showPayment && (form.watch('paymentMethod') === 'upi' || form.watch('paymentMethod') === 'card') && user && profile && (
+        <div className="fixed inset-0 z-50">
+          <GooglePayPayment
+            amount={total}
+            onSuccess={handlePaymentSuccess}
+            onError={handlePaymentError}
+            userData={{
+              name: profile.name,
+              email: profile.email,
+              phone: profile.phone
+            }}
+            paymentMethod={form.watch('paymentMethod')}
+          />
+        </div>
       )}
     </div>
   );

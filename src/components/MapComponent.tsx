@@ -101,15 +101,21 @@ const MapComponent: React.FC<MapComponentProps> = ({
         const coordinates = points.map(point => `${point[1]},${point[0]}`).join(';');
         
         // Use the correct MapTiler Directions API endpoint
-        const url = `https://api.maptiler.com/directions/v2/route/${coordinates}?key=${MAPTILER_API_KEY}&geometries=geojson&alternatives=false&language=en&overview=full&steps=true`;
+        const url = `https://api.maptiler.com/directions/v2/route?key=${MAPTILER_API_KEY}&geometries=geojson&alternatives=false&language=en&overview=full&steps=true&coordinates=${coordinates}&profile=driving`;
 
         const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
 
         if (data.routes && data.routes[0]) {
           // Extract the route coordinates from the response
           const routeCoordinates = data.routes[0].geometry.coordinates.map((coord: number[]) => [coord[1], coord[0]]);
           setRoutePath(routeCoordinates);
+        } else {
+          // Fallback to straight line if no route found
+          setRoutePath([route.start, ...(route.waypoints || []), route.end]);
         }
       } catch (error) {
         console.error('Error fetching route:', error);
@@ -152,12 +158,10 @@ const MapComponent: React.FC<MapComponentProps> = ({
         maxZoom={19}
       >
         <TileLayer
-          url={`https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_API_KEY}`}
+          url={`https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=${MAPTILER_API_KEY}`}
           attribution='<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
           maxZoom={19}
           minZoom={12}
-          tileSize={512}
-          zoomOffset={-1}
         />
         
         {/* Render markers */}

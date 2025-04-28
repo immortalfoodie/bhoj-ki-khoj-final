@@ -20,7 +20,7 @@ const initialMenuItems = [
     description: "A grand thali with 4 curries, 2 breads, rice, dessert, and more",
     shortDescription: "Ghee-laced rotis, seasonal sabzis, served with lassi",
     price: 450,
-    image: "https://source.unsplash.com/random/300x200/?thali",
+    image: "https://images.unsplash.com/photo-1680993032090-1ef7ea9b51e5?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     category: "thali",
     isVeg: true,
     isPopular: true,
@@ -33,7 +33,7 @@ const initialMenuItems = [
     name: "Dal Makhani",
     description: "Creamy black lentils cooked overnight with butter and cream",
     price: 180,
-    image: "https://source.unsplash.com/random/300x200/?dal",
+    image: "https://www.funfoodfrolic.com/wp-content/uploads/2023/04/Dal-Makhani-Blog.jpg",
     category: "main",
     isVeg: true,
     isAvailable: true
@@ -43,7 +43,7 @@ const initialMenuItems = [
     name: "Veg Biryani",
     description: "Fragrant rice cooked with mixed vegetables and aromatic spices",
     price: 220,
-    image: "https://source.unsplash.com/random/300x200/?biryani",
+    image: "https://www.whiskaffair.com/wp-content/uploads/2020/08/Veg-Biryani-2-3.jpg",
     category: "rice",
     isVeg: true,
     isAvailable: true
@@ -53,7 +53,7 @@ const initialMenuItems = [
     name: "Gulab Jamun",
     description: "Deep-fried milk solid balls soaked in sugar syrup",
     price: 120,
-    image: "https://source.unsplash.com/random/300x200/?sweet",
+    image: "https://images.immediate.co.uk/production/volatile/sites/30/2020/10/Gulab-jamun-69ba41a.jpg",
     category: "dessert",
     isVeg: true,
     isAvailable: true
@@ -191,19 +191,38 @@ const MenuManagement = () => {
         <h1 className="text-2xl font-bold text-gray-800">Menu Management</h1>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-bhoj-primary hover:bg-bhoj-dark">
+            <Button 
+              className="bg-bhoj-primary hover:bg-bhoj-dark"
+              onClick={() => {
+                setEditingItem(null);
+                setSelectedImage(null);
+                form.reset({
+                  name: "",
+                  description: "",
+                  shortDescription: "",
+                  price: "",
+                  category: "main",
+                  isVeg: true,
+                  isPopular: false,
+                  spiceLevel: "Medium",
+                  portionSize: "Full meal",
+                  isAvailable: true,
+                  image: ""
+                });
+              }}
+            >
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Menu Item
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
+          <DialogContent className="sm:max-w-[425px] max-h-[90vh] flex flex-col">
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle>{editingItem ? "Edit Menu Item" : "Add New Menu Item"}</DialogTitle>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 overflow-y-auto flex-1 pr-2">
                 {/* Image Upload */}
-                <FormItem>
+                <FormItem className="flex-shrink-0">
                   <FormLabel>Item Image</FormLabel>
                   <FormControl>
                     <div className="flex flex-col items-center space-y-2">

@@ -2,6 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 
+// Add Google Pay API types
+declare global {
+  interface Window {
+    google?: {
+      payments?: {
+        api: {
+          PaymentsClient: new (options: { environment: string }) => {
+            isReadyToPay: (request: any) => Promise<{ result: boolean }>;
+            loadPaymentData: (request: any) => Promise<any>;
+          };
+        };
+      };
+    };
+  }
+}
+
 interface GooglePayPaymentProps {
   amount: number;
   onSuccess: (paymentId: string) => void;
@@ -12,21 +28,51 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({ amount, onSuccess, 
   const [isReady, setIsReady] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { user, profile } = useAuth();
+  const [isApiBlocked, setIsApiBlocked] = useState(false);
   const { toast } = useToast();
 
+  // Check if browser is supported
+  const isBrowserSupported = () => {
+    const isChromium = window.chrome !== undefined;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    return isChromium || isSafari;
+  };
+
   useEffect(() => {
-    const checkGooglePay = async () => {
-      try {
-        if (!window.google?.payments?.api) {
-          console.error('Google Pay API not available');
-          setError('Google Pay is not available in your browser');
-          onError?.('Google Pay is not available in your browser');
+    const loadGooglePayScript = () => {
+      return new Promise((resolve, reject) => {
+        if (window.google?.payments?.api) {
+          resolve(true);
           return;
         }
 
-        const paymentsClient = new google.payments.api.PaymentsClient({
-          environment: 'TEST' // Always use TEST for development
+        const script = document.createElement('script');
+        script.src = 'https://pay.google.com/gp/p/js/pay.js';
+        script.async = true;
+        script.onload = () => resolve(true);
+        script.onerror = () => reject(new Error('Failed to load Google Pay script'));
+        document.body.appendChild(script);
+      });
+    };
+
+    const checkGooglePay = async () => {
+      if (!isBrowserSupported()) {
+        setIsApiBlocked(true);
+        setError('Please use Chrome, Brave, or another supported browser');
+        return;
+      }
+
+      try {
+        await loadGooglePayScript();
+        
+        if (!window.google?.payments?.api) {
+          console.error('Google Pay API not available');
+          setIsApiBlocked(true);
+          return;
+        }
+
+        const paymentsClient = new window.google.payments.api.PaymentsClient({
+          environment: 'TEST' // Keep this as TEST for everyone
         });
 
         const isReadyToPay = await paymentsClient.isReadyToPay({
@@ -36,7 +82,7 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({ amount, onSuccess, 
             type: 'CARD',
             parameters: {
               allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
-              allowedCardNetworks: ['MASTERCARD', 'VISA', 'AMEX', 'DISCOVER', 'JCB']
+              allowedCardNetworks: ['MASTERCARD', 'VISA']
             }
           }]
         });
@@ -45,33 +91,44 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({ amount, onSuccess, 
         
         if (!isReadyToPay.result) {
           setError('Google Pay is not available for your device');
-          onError?.('Google Pay is not available for your device');
+          setIsApiBlocked(true);
         }
       } catch (error) {
         console.error('Error checking Google Pay availability:', error);
+        setIsApiBlocked(true);
         setError('Failed to initialize Google Pay');
-        onError?.('Failed to initialize Google Pay');
       }
     };
 
     checkGooglePay();
-  }, [onError]);
+  }, []);
 
   const handlePayment = async () => {
     try {
       setIsProcessing(true);
       setError(null);
 
+      // Always simulate payment in test mode
+      const simulatePayment = () => {
+        const paymentId = 'TEST-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        onSuccess(paymentId);
+        toast({
+          title: 'Test Payment Successful',
+          description: 'This is a test payment - no actual charges made',
+        });
+      };
+
+      if (isApiBlocked) {
+        setTimeout(simulatePayment, 2000);
+        return;
+      }
+
       if (!window.google?.payments?.api) {
         throw new Error('Google Pay API not available');
       }
 
-      // For testing purposes, use a fixed merchant ID and gateway
-      const testMerchantId = '12345678901234567890';
-      const testGateway = 'example';
-
-      const paymentsClient = new google.payments.api.PaymentsClient({
-        environment: 'TEST' // Always use TEST for development
+      const paymentsClient = new window.google.payments.api.PaymentsClient({
+        environment: 'TEST'
       });
 
       const paymentDataRequest = {
@@ -81,63 +138,46 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({ amount, onSuccess, 
           type: 'CARD',
           parameters: {
             allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
-            allowedCardNetworks: ['MASTERCARD', 'VISA', 'AMEX', 'DISCOVER', 'JCB']
+            allowedCardNetworks: ['MASTERCARD', 'VISA']
           },
           tokenizationSpecification: {
             type: 'PAYMENT_GATEWAY',
             parameters: {
-              gateway: testGateway,
-              gatewayMerchantId: testMerchantId
+              gateway: 'example',
+              gatewayMerchantId: 'exampleGatewayMerchantId'
             }
           }
         }],
         merchantInfo: {
-          merchantId: testMerchantId,
-          merchantName: 'Bhoj Basket Test Store'
+          merchantId: 'BCR2DN4T7S4K3WNJ', // Test merchant ID that works for everyone
+          merchantName: 'Bhoj Basket (Test Mode)'
         },
         transactionInfo: {
           totalPriceStatus: 'FINAL',
           totalPrice: amount.toFixed(2),
           currencyCode: 'INR',
-          countryCode: 'IN'
-        },
-        // Add callback intents for better error handling
-        callbackIntents: ['PAYMENT_AUTHORIZATION']
+          countryCode: 'IN',
+          displayItems: [{
+            label: 'Test Order',
+            type: 'SUBTOTAL',
+            price: amount.toFixed(2),
+          }],
+          totalPriceLabel: 'Total (Test)'
+        }
       };
 
-      // For demo purposes, simulate a successful payment without actually calling Google Pay
-      // This avoids the OR_BIBED_11 error in development
-      
-      // Comment this out for production:
-      setTimeout(() => {
-        // Generate a random payment ID for demo purposes
-        const paymentId = 'PAY-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-        onSuccess(paymentId);
-        
-        toast({
-          title: 'Payment Successful',
-          description: 'Your payment has been processed successfully',
-        });
-        setIsProcessing(false);
-      }, 2000);
-      
-      // Uncomment this for production:
-      /*
-      const paymentData = await paymentsClient.loadPaymentData(paymentDataRequest);
-      
-      if (!paymentData?.paymentMethodData?.tokenizationData?.token) {
-        throw new Error('Invalid payment data received');
+      try {
+        await paymentsClient.loadPaymentData(paymentDataRequest);
+        simulatePayment();
+      } catch (paymentError: any) {
+        // If it's a cancellation, handle it gracefully
+        if (paymentError.statusCode === 'CANCELED') {
+          throw new Error('Payment cancelled');
+        }
+        // For other errors, still complete the test payment
+        console.log('Payment API error, falling back to test mode:', paymentError);
+        simulatePayment();
       }
-
-      // In production, send the token to your server for processing
-      const paymentId = 'PAY-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-      onSuccess(paymentId);
-      
-      toast({
-        title: 'Payment Successful',
-        description: 'Your payment has been processed successfully',
-      });
-      */
       
     } catch (error) {
       console.error('Payment error:', error);
@@ -150,19 +190,21 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({ amount, onSuccess, 
         description: errorMessage,
         variant: "destructive"
       });
+    } finally {
       setIsProcessing(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold mb-2">Google Pay</h2>
-          <p className="text-gray-600">Complete your payment using Google Pay</p>
+          <h2 className="text-2xl font-bold mb-2">Payment </h2>
+          <p className="text-gray-600">Complete your test payment using Google Pay</p>
+         
         </div>
         <div className="flex flex-col items-center space-y-4">
-          {isReady ? (
+          {isReady || isApiBlocked ? (
             <button
               onClick={handlePayment}
               disabled={isProcessing}
@@ -177,7 +219,7 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({ amount, onSuccess, 
                     alt="Google Pay" 
                     className="h-6 mr-2"
                   />
-                  Pay ₹{amount}
+                  Pay ₹{amount} 
                 </>
               )}
             </button>
@@ -187,7 +229,7 @@ const GooglePayPayment: React.FC<GooglePayPaymentProps> = ({ amount, onSuccess, 
           {error && (
             <p className="text-red-500 text-sm text-center">{error}</p>
           )}
-          <p className="text-sm text-gray-500">Test Mode - No actual payment will be processed</p>
+          <p className="text-sm text-gray-500 font-semibold">Demo Mode - No actual charges</p>
           <button 
             onClick={() => onError?.('Payment cancelled')}
             className="text-sm text-gray-500 hover:text-gray-700"

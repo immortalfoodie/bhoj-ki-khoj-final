@@ -31,7 +31,7 @@ const ViewCartButton = () => {
   return (
     <AnimatePresence>
       <motion.div 
-        className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-b from-transparent to-white pb-[env(safe-area-inset-bottom)] md:pb-2"
+        className="fixed bottom-16 left-0 right-0 z-50 bg-gradient-to-b from-transparent to-white pb-[env(safe-area-inset-bottom)] md:pb-2"
         initial="initial"
         animate="animate"
         exit="exit"

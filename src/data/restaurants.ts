@@ -352,8 +352,8 @@ export const restaurantsData: { [key: string]: Restaurant } = {
   "3": {
     id: "3",
     name: "Vada Pav Corner",
-    image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&q=75&fit=crop&w=600",
-    bannerImage: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&q=75&fit=crop&w=1200",
+    image: "https://images.pexels.com/photos/17433337/pexels-photo-17433337/free-photo-of-roll-with-fried-meat-and-green-chili.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    bannerImage: "https://images.pexels.com/photos/17433337/pexels-photo-17433337/free-photo-of-roll-with-fried-meat-and-green-chili.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     rating: 4.7,
     ratingCount: 312,
     deliveryTime: "15-25 min",
@@ -451,8 +451,8 @@ export const restaurantsData: { [key: string]: Restaurant } = {
   "4": {
     id: "4",
     name: "Punjabi Dhaba",
-    image: "https://images.unsplash.com/photo-1546833998-877b37c2e5c4?auto=format&q=75&fit=crop&w=600",
-    bannerImage: "https://images.unsplash.com/photo-1546833998-877b37c2e5c4?auto=format&q=75&fit=crop&w=1200",
+    image: "https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg?auto=compress&cs=tinysrgb&w=600",
+    bannerImage: "https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg?auto=compress&cs=tinysrgb&w=1200",
     rating: 4.0,
     ratingCount: 178,
     deliveryTime: "35-45 min",

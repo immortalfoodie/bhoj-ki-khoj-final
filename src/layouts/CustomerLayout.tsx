@@ -9,14 +9,14 @@ const CustomerLayout = () => {
   const location = useLocation();
 
   return (
-    <div className="flex h-screen bg-green-50">
+    <div className="flex y-auto bg-green-50">
       <SideNav />
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen" style={{overflow: 'auto', height: '100vh'}}>
         <div className="py-2 px-4 bg-white shadow-sm md:hidden">
           <h1 className="text-xl font-bold text-green-700">Customer Dashboard</h1>
         </div>
         <motion.main 
-          className="flex-1 overflow-y-auto pt-2 pb-20 md:pb-8 px-4"
+          className="flex-1  pt-2 pb-20 md:pb-8 px-4"
           initial="initial"
           animate="animate"
           exit="exit"

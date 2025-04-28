@@ -11,7 +11,7 @@ const restaurants = [
   {
     id: "1",
     name: "Maharaja Thali House",
-    image: "https://images.unsplash.com/photo-1600891964092-4316c288032e?auto=format&q=75&fit=crop&w=600",
+    image: "https://images.unsplash.com/photo-1680993032090-1ef7ea9b51e5?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     cuisine: ["North Indian", "Thali"],
     rating: 4.5,
     distance: "1.2 km",
@@ -31,7 +31,7 @@ const restaurants = [
   {
     id: "3",
     name: "Vada Pav Corner",
-    image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&q=75&fit=crop&w=600",
+    image: "https://images.pexels.com/photos/17433337/pexels-photo-17433337/free-photo-of-roll-with-fried-meat-and-green-chili.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     cuisine: ["Street Food", "Snacks"],
     rating: 4.7,
     distance: "0.5 km",
@@ -41,7 +41,7 @@ const restaurants = [
   {
     id: "4",
     name: "Punjabi Dhaba",
-    image: "https://images.unsplash.com/photo-1546833998-877b37c2e5c4?auto=format&q=75&fit=crop&w=600",
+    image: "https://www.shoutlo.com/uploads/articles/header-img-punjabi-delicacies.jpg",
     cuisine: ["North Indian", "Curry"],
     rating: 4.0,
     distance: "1.5 km",
